@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+	<Properties>
+		<Property name="log-path">logs</Property>
+		<Property name="app-name">jesturedrawing</Property>
+	</Properties>
+
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%-5level|%d{yyyyMMdd-HHmmss}|%t|%C{1} - %msg%n"/>
+		</Console>
+
+		<RollingFile name="RollingFile" fileName="${log-path}/${app-name}.log"
+				filePattern="${log-path}/${app-name}-%d{yyyyMMdd}.log">
+			<PatternLayout pattern="%-5level|%d{yyyyMMdd-HHmmss}|%t|%C{1} - %msg%n"/>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+			</Policies>
+			<DefaultRolloverStrategy max="7"/>
+		</RollingFile>
+	</Appenders>
+
+	<Loggers>
+		<Root level="TRACE">
+			<AppenderRef ref="Console" level="DEBUG"/>
+			<AppenderRef ref="RollingFile" level="TRACE"/>
+		</Root>
+	</Loggers>
+</Configuration>
