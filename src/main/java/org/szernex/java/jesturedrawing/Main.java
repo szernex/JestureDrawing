@@ -11,9 +11,9 @@ import java.nio.file.Paths;
 public class Main extends Application {
 	private static final Logger logger = LogManager.getLogger(Main.class);
 
-	private static final JsonConfig<ConfigObject> jsonConfig = new JsonConfig<>(ConfigObject.class);
+	private static final JsonConfig<ApplicationConfig> jsonConfig = new JsonConfig<>(ApplicationConfig.class);
 
-	public static final ConfigObject applicationConfig = jsonConfig.load(Paths.get(R.CONFIG_FILE));
+	public static final ApplicationConfig applicationConfig = jsonConfig.load(Paths.get(R.CONFIG_FILE));
 
 	public static void main(String[] args) {
 		if (applicationConfig == null) {
@@ -26,7 +26,7 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		logger.traceEntry("Application starting");
+		logger.trace("Application starting");
 	}
 
 	@Override
@@ -35,6 +35,6 @@ public class Main extends Application {
 
 		jsonConfig.save(applicationConfig, Paths.get(R.CONFIG_FILE));
 
-		logger.traceExit("Application stopped");
+		logger.trace("Application stopped");
 	}
 }

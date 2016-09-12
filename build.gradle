@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    compile group: 'org.szernex.java', name: 'JsonConfig', version: '0.0.2'
+    compile group: 'org.szernex.java', name: 'JsonConfig', version: '0.0.3'
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.6.2'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.6.2'
 }
