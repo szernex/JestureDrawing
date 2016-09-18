@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GestureClass {
-	String title = "Class";
-	List<GestureSession> sessions = new ArrayList<>();
+	public String title = "Class";
+	public List<GestureSession> sessions = new ArrayList<>();
 
-	public class GestureSession {
-		String title = "Session";
-		List<String> paths = new ArrayList<>();
-		int image_count = 10;
-		int interval = 30;
-		int break_after = 30;
-		boolean timer = true;
+	public static class GestureSession {
+		public String title = "Session";
+		public List<String> paths = new ArrayList<>();
+		public boolean include_subdirs = false;
+		public int image_count = 10;
+		public int interval = 30;
+		public int break_after = 30;
+		public boolean timer = true;
 	}
 }

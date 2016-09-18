@@ -37,6 +37,7 @@
 	</Separator>
 
 	<HBox alignment="CENTER">
-		<Button text="Options"/>
+		<Button text="Options"
+				onMouseClicked="#onOptionsClick"/>
 	</HBox>
 </VBox>
