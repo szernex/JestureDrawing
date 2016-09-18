@@ -11,9 +11,11 @@ import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.szernex.java.jesturedrawing.GestureClass;
+import org.szernex.java.jsonconfig.JsonConfig;
 
 import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
@@ -30,37 +32,15 @@ public class MainController implements Initializable {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		imageParent.getChildren().add(new ImagePane("images/test.png", "-fx-background-position: center center; -fx-background-size: contain; -fx-background-repeat: no-repeat;"));
-
-
+		imageParent.getChildren().add(new ImagePane("images/test.png", ImagePane.DEFAULT_STYLE));
 	}
 
 	@FXML
 	public void onOptionsClick() {
-		GestureClass gestureClass = new GestureClass();
-		GestureClass.GestureSession gestureSession = new GestureClass.GestureSession();
+		JsonConfig<GestureClass> config = new JsonConfig<>(GestureClass.class);
+		GestureClass gestureClass = config.load(Paths.get("testclass.json"));
 
-		gestureSession.paths.add("d:/test");
-		gestureSession.paths.add("d:/test2");
-		gestureSession.include_subdirs = true;
-		gestureSession.interval = 5;
-		gestureSession.image_count = 2;
-		gestureSession.break_after = 10;
-		gestureClass.sessions.add(gestureSession);
-
-		gestureSession = new GestureClass.GestureSession();
-
-		gestureSession.paths.add("d:/test");
-		gestureSession.paths.add("d:/test2");
-		gestureSession.include_subdirs = true;
-		gestureSession.interval = 10;
-		gestureSession.image_count = 2;
-		gestureSession.break_after = 10;
-		gestureClass.sessions.add(gestureSession);
-
-		ticker = new Ticker();
-
-		ticker.initialize(gestureClass);
+		ticker = new Ticker(gestureClass);
 
 		Timeline timeline = new Timeline(
 				new KeyFrame(
@@ -78,19 +58,41 @@ public class MainController implements Initializable {
 		if (ticker.isFinished())
 			return;
 
+		Path image = ticker.getCurrentImage();
+		ImagePane imagePane = null;
+
+		if (image == null)
+			imagePane = new ImagePane("images/test.png", ImagePane.DEFAULT_STYLE);
+		else if (!image.equals(currentImage)) {
+			currentImage = image;
+			imagePane = new ImagePane(image.toUri().toString(), ImagePane.DEFAULT_STYLE);
+		}
+
+		if (imagePane != null) {
+			imageParent.getChildren().clear();
+			imageParent.getChildren().add(imagePane);
+		}
+
+		pbTimer.setProgress(1.0 - ((1.0 / ticker.getCurrentSession().interval) * (ticker.getCurrentTimer())));
+
+		/*ticker.tick();
+
+		if (ticker.isFinished())
+			return;
+
 		pbTimer.setProgress((1.0 / ticker.getCurrentSession().interval) * ticker.getCurrentTimer());
 
 		logger.debug(ticker);
 
 		if (ticker.getCurrentImage() == null) {
-			imageParent.getChildren().add(new ImagePane("images/test.png", "-fx-background-position: center center; -fx-background-size: contain; -fx-background-repeat: no-repeat;"));
+			imageParent.getChildren().add(new ImagePane("images/test.png", ImagePane.DEFAULT_STYLE));
 		} else if (!ticker.getCurrentImage().equals(currentImage)) {
 			currentImage = ticker.getCurrentImage();
 			imageParent.getChildren().clear();
 
 			if (currentImage != null)
-				imageParent.getChildren().add(new ImagePane(currentImage.toUri().toString(), "-fx-background-position: center center; -fx-background-size: contain; -fx-background-repeat: no-repeat;"));
+				imageParent.getChildren().add(new ImagePane(currentImage.toUri().toString(), ImagePane.DEFAULT_STYLE));
 
-		}
+		}*/
 	}
 }

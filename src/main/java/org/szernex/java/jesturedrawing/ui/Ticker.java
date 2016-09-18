@@ -14,49 +14,45 @@ public class Ticker {
 	private static final Logger logger = LogManager.getLogger(Ticker.class);
 
 	private GestureClass gestureClass;
-	private GestureClass.GestureSession currentSession;
-	private int currentTimer;
-	private Path currentImage;
-	private int currentImageCount;
+	private ListIterator<GestureClass.GestureSession> sessionIterator;
 	private boolean finished;
-
-	private int sessionIndex;
-	private List<Path> images;
+	private GestureClass.GestureSession currentSession;
+	private ArrayList<Path> imageList;
+	private int currentTimer;
+	private int currentImageCount;
+	private Path currentImage;
 	private Random random;
 
-	public GestureClass.GestureSession getCurrentSession() {
-		return currentSession;
+	public Ticker() {
 	}
 
-	public int getCurrentTimer() {
-		return currentTimer;
-	}
-
-	public Path getCurrentImage() {
-		return currentImage;
+	public Ticker(GestureClass gestureClass) {
+		initialize(gestureClass);
 	}
 
 	public boolean isFinished() {
 		return finished;
 	}
 
-	public void initialize(GestureClass c) {
-		gestureClass = c;
+	public Path getCurrentImage() {
+		return currentImage;
+	}
 
-		if (gestureClass.sessions.size() == 0) {
-			logger.error("Ticker initialized with GestureClass containing no GestureSession");
-			return;
-		}
+	public int getCurrentTimer() {
+		return Math.max(0, currentTimer);
+	}
 
-		sessionIndex = -1;
-		selectNextSession(gestureClass);
-		currentTimer = currentSession.interval;
+	public GestureClass.GestureSession getCurrentSession() {
+		return currentSession;
+	}
+
+	public void initialize(GestureClass gestureClass) {
+		this.gestureClass = gestureClass;
+		sessionIterator = gestureClass.sessions.listIterator();
 		random = new Random(System.currentTimeMillis());
-		currentImage = getRandomImagePath(images);
+		currentTimer = 0;
 
-		for (Path p : images) {
-			logger.debug(p.toString());
-		}
+		initializeNextSession();
 	}
 
 	public void tick() {
@@ -65,46 +61,39 @@ public class Ticker {
 
 		currentTimer--;
 
-		if (currentTimer <= 0) {
-			logger.debug("Timer reached 0");
+		if (currentTimer > 0)
+			return;
 
-			// only decrement counter when we're not finishing a break
-			if (currentImage != null)
-				currentImageCount--;
-
-			if (currentImageCount > 0) {
-				logger.debug("Selected new random image");
-
-				currentImage = getRandomImagePath(images);
-				currentTimer = currentSession.interval;
-			} else {
-				logger.info("Session " + currentSession.title + " finished. Starting break of " + currentSession.break_after + " seconds.");
-
-				currentImage = null;
-				currentTimer = currentSession.break_after;
-				selectNextSession(gestureClass);
-			}
-		}
-	}
-
-	private void selectNextSession(GestureClass gc) {
-		sessionIndex++;
-
-		if (sessionIndex >= gc.sessions.size()) {
-			finished = true;
-			currentSession = null;
+		if (currentImageCount < currentSession.image_count) {
+			currentImage = getRandomImage(imageList);
+			currentTimer = currentSession.interval;
+			currentImageCount++;
 		} else {
-			currentSession = gc.sessions.get(sessionIndex);
-			currentImageCount = currentSession.image_count;
-			images = new ArrayList<>(getFileList(currentSession.paths, currentSession.include_subdirs));
+			currentTimer = currentSession.break_after_session;
+			initializeNextSession();
 		}
 	}
 
-	private Path getRandomImagePath(List<Path> paths) {
-		return paths.get(random.nextInt(paths.size()));
+	private Path getRandomImage(List<Path> images) {
+		return images.get(random.nextInt(images.size()));
 	}
 
-	private Set<Path> getFileList(List<String> paths, boolean recursive) {
+	private void initializeNextSession() {
+		currentImage = null;
+		currentSession = null;
+
+		if (sessionIterator == null || !sessionIterator.hasNext()) {
+			finished = true;
+			return;
+		}
+
+		currentSession = sessionIterator.next();
+		imageList = new ArrayList<>(getFileSet(currentSession.paths, currentSession.include_subdirs));
+		finished = false;
+		currentImageCount = 0;
+	}
+
+	private Set<Path> getFileSet(List<String> paths, boolean recursive) {
 		ImageFileVisitor visitor = new ImageFileVisitor();
 		int depth = (recursive ? Integer.MAX_VALUE : 1);
 
