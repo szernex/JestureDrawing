@@ -30,7 +30,7 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		logger.trace("Application starting");
+		logger.trace("Application started");
 
 		Parent parent = FXMLLoader.load(ClassLoader.getSystemResource("ui/main.fxml"));
 		Scene scene = new Scene(parent, 0, 0);
