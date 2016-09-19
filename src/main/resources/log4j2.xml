@@ -7,12 +7,12 @@
 
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT">
-			<PatternLayout pattern="%-5level|%d{yyyyMMdd-HHmmss}|%t|%C{1} - %msg%n"/>
+			<PatternLayout pattern="%-5level|%d{yyyyMMdd-HHmmss.SSS}|%t|%C{1} - %msg%n"/>
 		</Console>
 
 		<RollingFile name="RollingFile" fileName="${log-path}/${app-name}.log"
 				filePattern="${log-path}/${app-name}-%d{yyyyMMdd}.log">
-			<PatternLayout pattern="%-5level|%d{yyyyMMdd-HHmmss}|%t|%C{1} - %msg%n"/>
+			<PatternLayout pattern="%-5level|%d{yyyyMMdd-HHmmss.SSS}|%t|%C{1} - %msg%n"/>
 			<Policies>
 				<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
 			</Policies>

@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -20,6 +18,10 @@
 			prefHeight="20"
 			maxWidth="Infinity"
 			progress="0"/>
+	<ProgressBar fx:id="pbProgress"
+			prefHeight="20"
+			maxWidth="Infinity"
+			progress="0"/>
 
 	<Separator>
 		<padding>
@@ -28,7 +30,8 @@
 	</Separator>
 
 	<StackPane fx:id="imageParent"
-			VBox.vgrow="ALWAYS"/>
+			VBox.vgrow="ALWAYS">
+	</StackPane>
 
 	<Separator>
 		<padding>
@@ -37,7 +40,7 @@
 	</Separator>
 
 	<HBox alignment="CENTER">
-		<Button text="Options"
+		<Button text="Test"
 				onMouseClicked="#onOptionsClick"/>
 	</HBox>
 </VBox>

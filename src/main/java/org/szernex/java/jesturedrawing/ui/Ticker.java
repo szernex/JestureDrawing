@@ -16,12 +16,14 @@ public class Ticker {
 	private GestureClass gestureClass;
 	private ListIterator<GestureClass.GestureSession> sessionIterator;
 	private boolean finished;
+	private boolean paused;
 	private GestureClass.GestureSession currentSession;
 	private ArrayList<Path> imageList;
 	private int currentTimer;
 	private int currentImageCount;
 	private Path currentImage;
 	private Random random;
+	private HashSet<TickListener> tickListeners = new HashSet<>();
 
 	public Ticker() {
 	}
@@ -46,11 +48,20 @@ public class Ticker {
 		return currentSession;
 	}
 
+	public int getCurrentImageCount() {
+		return currentImageCount;
+	}
+
+	public void addTickListener(TickListener listener) {
+		tickListeners.add(listener);
+	}
+
 	public void initialize(GestureClass gestureClass) {
 		this.gestureClass = gestureClass;
 		sessionIterator = gestureClass.sessions.listIterator();
 		random = new Random(System.currentTimeMillis());
 		currentTimer = 0;
+		imageList = new ArrayList<>();
 
 		initializeNextSession();
 	}
@@ -59,38 +70,56 @@ public class Ticker {
 		if (finished)
 			return;
 
+		tickListeners.forEach(listener -> listener.onTickStart(this));
+
 		currentTimer--;
 
 		if (currentTimer > 0)
 			return;
 
+		if (paused) {
+			paused = false;
+			tickListeners.forEach(listener -> listener.onBreakEnd(this));
+		}
+
 		if (currentImageCount < currentSession.image_count) {
 			currentImage = getRandomImage(imageList);
 			currentTimer = currentSession.interval;
 			currentImageCount++;
+			tickListeners.forEach(listener -> listener.onNewImage(this));
 		} else {
-			currentTimer = currentSession.break_after_session;
-			initializeNextSession();
+			if (initializeNextSession()) {
+				currentTimer = currentSession.break_after_session;
+				paused = true;
+				tickListeners.forEach(listener -> listener.onBreakStart(this));
+			}
 		}
+
+		tickListeners.forEach(listener -> listener.onTickEnd(this));
 	}
 
 	private Path getRandomImage(List<Path> images) {
 		return images.get(random.nextInt(images.size()));
 	}
 
-	private void initializeNextSession() {
+	private boolean initializeNextSession() {
 		currentImage = null;
 		currentSession = null;
 
 		if (sessionIterator == null || !sessionIterator.hasNext()) {
 			finished = true;
-			return;
+			tickListeners.forEach(listener -> listener.onFinished(this));
+
+			return false;
 		}
 
 		currentSession = sessionIterator.next();
-		imageList = new ArrayList<>(getFileSet(currentSession.paths, currentSession.include_subdirs));
+		imageList.clear();
+		imageList.addAll(getFileSet(currentSession.paths, currentSession.include_subdirs));
 		finished = false;
 		currentImageCount = 0;
+
+		return true;
 	}
 
 	private Set<Path> getFileSet(List<String> paths, boolean recursive) {
