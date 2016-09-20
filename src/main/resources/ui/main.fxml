@@ -14,7 +14,7 @@
 	</padding>
 
 	<ProgressBar fx:id="pbTimer"
-			minHeight="25"
+			minHeight="12"
 			maxWidth="Infinity"
 			progress="0"/>
 	<StackPane>
@@ -44,5 +44,7 @@
 	<HBox alignment="CENTER">
 		<Button text="Test"
 				onMouseClicked="#onOptionsClick"/>
+		<CheckBox fx:id="chkAlwaysOnTop"
+				text="Always on top"/>
 	</HBox>
 </VBox>

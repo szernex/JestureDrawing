@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.szernex.java.jesturedrawing.ui.CustomController;
 import org.szernex.java.jsonconfig.JsonConfig;
 
 import java.nio.file.Paths;
@@ -32,10 +33,15 @@ public class Main extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		logger.trace("Application started");
 
-		Parent parent = FXMLLoader.load(ClassLoader.getSystemResource("ui/main.fxml"));
+		FXMLLoader loader = new FXMLLoader();
+
+		loader.setLocation(ClassLoader.getSystemResource("ui/main.fxml"));
+
+		Parent parent = loader.load();
 		Scene scene = new Scene(parent, 0, 0);
 
 		primaryStage.setTitle(R.APPLICATION_TITLE);
+		primaryStage.setAlwaysOnTop(applicationConfig.window.always_on_top);
 		primaryStage.setMaximized(applicationConfig.window.maximized);
 		primaryStage.setWidth(applicationConfig.window.width);
 		primaryStage.setHeight(applicationConfig.window.height);
@@ -46,11 +52,16 @@ public class Main extends Application {
 		primaryStage.show();
 
 		mainStage = primaryStage;
+
+		if (loader.getController() instanceof CustomController)
+			((CustomController) loader.getController()).setStage(primaryStage);
 	}
 
 	@Override
 	public void stop() throws Exception {
 		super.stop();
+
+		applicationConfig.window.always_on_top = mainStage.isAlwaysOnTop();
 
 		if (mainStage.isMaximized())
 			applicationConfig.window.maximized = true;

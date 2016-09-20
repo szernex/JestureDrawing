@@ -7,6 +7,7 @@ import javafx.animation.Timeline;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.effect.DropShadow;
@@ -15,6 +16,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,7 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
-public class MainController implements Initializable, TickListener {
+public class MainController implements Initializable, TickListener, CustomController {
 	private static final Logger logger = LogManager.getLogger(MainController.class);
 
 	@FXML
@@ -40,7 +42,10 @@ public class MainController implements Initializable, TickListener {
 	private Label lblSession;
 	@FXML
 	private Pane imageParent;
+	@FXML
+	private CheckBox chkAlwaysOnTop;
 
+	private Stage mainStage;
 	private ResizableImageView ivImage;
 	private Ticker ticker;
 	private Path currentImage = null;
@@ -61,6 +66,14 @@ public class MainController implements Initializable, TickListener {
 		imageParent.getChildren().add(ivImage);
 
 		mainContainer.getStylesheets().add("css/style.css");
+	}
+
+	@Override
+	public void setStage(Stage stage) {
+		mainStage = stage;
+
+		chkAlwaysOnTop.selectedProperty().set(mainStage.isAlwaysOnTop());
+		chkAlwaysOnTop.selectedProperty().addListener((observable, oldValue, newValue) -> mainStage.setAlwaysOnTop(newValue));
 	}
 
 	@FXML

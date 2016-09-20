@@ -5,6 +5,7 @@ public class ApplicationConfig {
 
 	public class Window {
 		boolean maximized = false;
+		boolean always_on_top = false;
 		double pos_x = 0.0;
 		double pos_y = 0.0;
 		double width = 400;
