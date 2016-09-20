@@ -2,11 +2,10 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
 <VBox xmlns:fx="http://javafx.com/fxml"
 		fx:controller="org.szernex.java.jesturedrawing.ui.MainController"
+		fx:id="mainContainer"
 		prefWidth="400"
 		prefHeight="600"
 		alignment="CENTER">
@@ -15,13 +14,16 @@
 	</padding>
 
 	<ProgressBar fx:id="pbTimer"
-			prefHeight="20"
+			minHeight="25"
 			maxWidth="Infinity"
 			progress="0"/>
-	<ProgressBar fx:id="pbProgress"
-			prefHeight="20"
-			maxWidth="Infinity"
-			progress="0"/>
+	<StackPane>
+		<ProgressBar fx:id="pbProgress"
+				minHeight="25"
+				maxWidth="Infinity"
+				progress="0"/>
+		<Label fx:id="lblSession"/>
+	</StackPane>
 
 	<Separator>
 		<padding>

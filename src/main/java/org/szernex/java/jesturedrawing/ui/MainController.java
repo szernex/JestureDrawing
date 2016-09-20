@@ -4,11 +4,17 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,9 +31,13 @@ public class MainController implements Initializable, TickListener {
 	private static final Logger logger = LogManager.getLogger(MainController.class);
 
 	@FXML
+	private Pane mainContainer;
+	@FXML
 	private ProgressBar pbTimer;
 	@FXML
 	private ProgressBar pbProgress;
+	@FXML
+	private Label lblSession;
 	@FXML
 	private Pane imageParent;
 
@@ -36,11 +46,21 @@ public class MainController implements Initializable, TickListener {
 	private Path currentImage = null;
 	private Timeline tickerTimeline;
 	private Timeline timerTimeline;
+	private SimpleStringProperty sessionTitle = new SimpleStringProperty();
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		DropShadow dropShadow = new DropShadow();
+
+		dropShadow.setColor(Color.color(1.0, 1.0, 1.0));
+		lblSession.setEffect(dropShadow);
+		lblSession.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 18));
+		lblSession.textProperty().bind(sessionTitle);
+
 		ivImage = new ResizableImageView();
 		imageParent.getChildren().add(ivImage);
+
+		mainContainer.getStylesheets().add("css/style.css");
 	}
 
 	@FXML
@@ -106,11 +126,11 @@ public class MainController implements Initializable, TickListener {
 
 		if (image == null) {
 			ivImage.setImage(new Image("images/test.png", R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
-		}
-		else if (!image.equals(currentImage)) {
+		} else if (!image.equals(currentImage)) {
 			ivImage.setImage(new Image(image.toUri().toString(), R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
 		}
 
+		sessionTitle.set(ticker.getCurrentSession().title);
 		pbProgress.setProgress((1.0 / ticker.getCurrentSession().image_count) * ticker.getCurrentImageCount());
 		pbTimer.setProgress(0.0);
 
