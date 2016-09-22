@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.szernex.java.jesturedrawing.ui.CustomController;
@@ -47,6 +48,8 @@ public class Main extends Application {
 		primaryStage.setHeight(applicationConfig.window.height);
 		primaryStage.setX(applicationConfig.window.pos_x);
 		primaryStage.setY(applicationConfig.window.pos_y);
+		//primaryStage.setOpacity(0.5);
+		primaryStage.initStyle(StageStyle.UNDECORATED);
 
 		primaryStage.setScene(scene);
 		primaryStage.show();

@@ -5,6 +5,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
@@ -12,6 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -27,9 +29,10 @@ import org.szernex.java.jsonconfig.JsonConfig;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.EnumSet;
 import java.util.ResourceBundle;
 
-public class MainController implements Initializable, TickListener, CustomController {
+public class MainController implements Initializable, TickListener, CustomController, EventHandler<MouseEvent> {
 	private static final Logger logger = LogManager.getLogger(MainController.class);
 
 	@FXML
@@ -52,6 +55,12 @@ public class MainController implements Initializable, TickListener, CustomContro
 	private Timeline tickerTimeline;
 	private Timeline timerTimeline;
 	private SimpleStringProperty sessionTitle = new SimpleStringProperty();
+	private double moveOffsetX = 0.0;
+	private double moveOffsetY = 0.0;
+	private double resizeOffsetX = 0.0;
+	private double resizeOffsetY = 0.0;
+	private boolean resizing = false;
+	private EnumSet<BorderSide> resizingSides = EnumSet.noneOf(BorderSide.class);
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -66,6 +75,9 @@ public class MainController implements Initializable, TickListener, CustomContro
 		imageParent.getChildren().add(ivImage);
 
 		mainContainer.getStylesheets().add("css/style.css");
+
+		mainContainer.addEventHandler(MouseEvent.ANY, this);
+		ivImage.addEventHandler(MouseEvent.ANY, this);
 	}
 
 	@Override
@@ -74,6 +86,42 @@ public class MainController implements Initializable, TickListener, CustomContro
 
 		chkAlwaysOnTop.selectedProperty().set(mainStage.isAlwaysOnTop());
 		chkAlwaysOnTop.selectedProperty().addListener((observable, oldValue, newValue) -> mainStage.setAlwaysOnTop(newValue));
+	}
+
+	@Override
+	public void handle(MouseEvent event) {
+		if (event.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
+			EnumSet<BorderSide> sides = isMouseAtBorder(mainStage, event.getSceneX(), event.getSceneY(), 10);
+
+			resizing = !sides.isEmpty();
+
+			if (resizing) {
+				resizingSides = sides;
+				resizeOffsetX = mainStage.getWidth() - event.getX();
+				resizeOffsetY = mainStage.getHeight() - event.getY();
+			} else {
+				moveOffsetX = event.getSceneX();
+				moveOffsetY = event.getSceneY();
+			}
+		} else if (event.getEventType().equals(MouseEvent.MOUSE_DRAGGED)) {
+			if (resizing) {
+				if (resizingSides.contains(BorderSide.East))
+					mainStage.setWidth(event.getX() + resizeOffsetX);
+				if (resizingSides.contains(BorderSide.South))
+					mainStage.setHeight(event.getY() + resizeOffsetY);
+			} else {
+				mainStage.setX(event.getScreenX() - moveOffsetX);
+				mainStage.setY(event.getScreenY() - moveOffsetY);
+			}
+		} else if (event.getEventType().equals(MouseEvent.MOUSE_RELEASED)) {
+			resizing = false;
+			resizingSides.clear();
+
+			if (mainContainer.getWidth() < mainContainer.getMinWidth())
+				mainStage.setWidth(mainContainer.getMinWidth() + 5);
+			if (mainContainer.getHeight() < mainContainer.getMinHeight())
+				mainStage.setHeight(mainContainer.getMinHeight() + 5);
+		}
 	}
 
 	@FXML
@@ -165,5 +213,24 @@ public class MainController implements Initializable, TickListener, CustomContro
 		ivImage.setImage(new Image("images/finished.png", R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
 		tickerTimeline.stop();
 		timerTimeline.stop();
+	}
+
+	private EnumSet<BorderSide> isMouseAtBorder(Stage stage, double mouse_x, double mouse_y, double border_width) {
+		EnumSet<BorderSide> sides = EnumSet.noneOf(BorderSide.class);
+
+		if (mouse_x < border_width)
+			sides.add(BorderSide.West);
+		if (mouse_x > (stage.getWidth() - border_width))
+			sides.add(BorderSide.East);
+		if (mouse_y < border_width)
+			sides.add(BorderSide.North);
+		if (mouse_y > (stage.getHeight() - border_width))
+			sides.add(BorderSide.South);
+
+		return sides;
+	}
+
+	private enum BorderSide {
+		North, East, South, West
 	}
 }

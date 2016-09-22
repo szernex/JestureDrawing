@@ -6,7 +6,9 @@
 <VBox xmlns:fx="http://javafx.com/fxml"
 		fx:controller="org.szernex.java.jesturedrawing.ui.MainController"
 		fx:id="mainContainer"
+		minWidth="150"
 		prefWidth="400"
+		minHeight="150"
 		prefHeight="600"
 		alignment="CENTER">
 	<padding>
