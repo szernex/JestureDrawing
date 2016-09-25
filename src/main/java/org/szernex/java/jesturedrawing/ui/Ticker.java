@@ -9,11 +9,8 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
-// TODO find better name
 public class Ticker {
 	private static final Logger logger = LogManager.getLogger(Ticker.class);
-
-	private GestureClass gestureClass;
 	private ListIterator<GestureClass.GestureSession> sessionIterator;
 	private boolean finished;
 	private boolean paused;
@@ -24,24 +21,12 @@ public class Ticker {
 	private Path currentImage;
 	private Random random;
 	private HashSet<TickListener> tickListeners = new HashSet<>();
-
-	public Ticker() {
-	}
-
 	public Ticker(GestureClass gestureClass) {
 		initialize(gestureClass);
 	}
 
-	public boolean isFinished() {
-		return finished;
-	}
-
 	public Path getCurrentImage() {
 		return currentImage;
-	}
-
-	public int getCurrentTimer() {
-		return Math.max(0, currentTimer);
 	}
 
 	public GestureClass.GestureSession getCurrentSession() {
@@ -57,7 +42,6 @@ public class Ticker {
 	}
 
 	public void initialize(GestureClass gestureClass) {
-		this.gestureClass = gestureClass;
 		sessionIterator = gestureClass.sessions.listIterator();
 		random = new Random(System.currentTimeMillis());
 		currentTimer = 0;
@@ -99,6 +83,9 @@ public class Ticker {
 	}
 
 	private Path getRandomImage(List<Path> images) {
+		if (images == null || images.isEmpty())
+			return null;
+
 		return images.get(random.nextInt(images.size()));
 	}
 
@@ -137,26 +124,27 @@ public class Ticker {
 
 		return visitor.getFiles();
 	}
+
+	public class ImageFileVisitor extends SimpleFileVisitor<Path> {
+		private final PathMatcher matcher;
+		private Set<Path> files;
+
+		ImageFileVisitor() {
+			matcher = FileSystems.getDefault().getPathMatcher("glob:**/*.{jpg,jpeg,png,bmp,tif,tiff}");
+			files = new TreeSet<>();
+		}
+
+		Set<Path> getFiles() {
+			return files;
+		}
+
+		@Override
+		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+			if (matcher.matches(file))
+				files.add(file);
+
+			return FileVisitResult.CONTINUE;
+		}
+	}
 }
 
-class ImageFileVisitor extends SimpleFileVisitor<Path> {
-	private final PathMatcher matcher;
-	private Set<Path> files;
-
-	ImageFileVisitor() {
-		matcher = FileSystems.getDefault().getPathMatcher("glob:**/*.{jpg,jpeg,png,bmp,tif,tiff}");
-		files = new TreeSet<>();
-	}
-
-	Set<Path> getFiles() {
-		return files;
-	}
-
-	@Override
-	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-		if (matcher.matches(file))
-			files.add(file);
-
-		return FileVisitResult.CONTINUE;
-	}
-}

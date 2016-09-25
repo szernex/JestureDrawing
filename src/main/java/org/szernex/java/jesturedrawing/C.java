@@ -4,8 +4,9 @@ package org.szernex.java.jesturedrawing;
 public final class C {
 	private static C instance = new C();
 
-	private ApplicationConfig applicationConfig;
-	private GestureClass gestureClass;
+	private ApplicationConfig applicationConfig = null;
+	private GestureClass gestureClass = null;
+	private boolean newClass = false;
 
 	public static C getInstance() {
 		return instance;
@@ -25,5 +26,13 @@ public final class C {
 
 	public void setGestureClass(GestureClass gestureClass) {
 		this.gestureClass = gestureClass;
+	}
+
+	public boolean isNewClass() {
+		return newClass;
+	}
+
+	public void setNewClass(boolean newClass) {
+		this.newClass = newClass;
 	}
 }

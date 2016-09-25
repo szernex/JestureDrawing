@@ -86,10 +86,14 @@ public class OptionsController implements Initializable, CustomController, Chang
 		txtInterval.textProperty().bindBidirectional(intervalProperty);
 		txtBreakAfter.textProperty().bindBidirectional(breakAfterProperty);
 
-		if (C.getInstance().getGestureClass() == null)
+		if (C.getInstance().getGestureClass() == null) {
 			currentClass = initializeNewClass();
-		else
+			C.getInstance().setNewClass(true);
+		} else {
 			currentClass = C.getInstance().getGestureClass();
+			loadClass(currentClass);
+			C.getInstance().setNewClass(false);
+		}
 	}
 
 	@Override
@@ -145,13 +149,14 @@ public class OptionsController implements Initializable, CustomController, Chang
 		lastLoadFile = file;
 		initializeNewClass();
 		currentClass = config.load(file.toPath());
-		sessionListProperty.addAll(currentClass.sessions);
+		loadClass(currentClass);
 		logger.debug("Class loaded");
 	}
 
 	@FXML
 	public void onSaveClassClick() {
 		logger.debug("Saving class");
+
 		FileChooser fileChooser = new FileChooser();
 
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json config files", "*.json"));
@@ -241,11 +246,26 @@ public class OptionsController implements Initializable, CustomController, Chang
 	}
 
 	@FXML
-	public void onCloseClick() {
-		if (currentClass != null && !currentClass.sessions.isEmpty())
+	public void onApplyClick() {
+		if (currentClass != null && !currentClass.sessions.isEmpty()) {
+			updateClass();
 			C.getInstance().setGestureClass(currentClass);
+			C.getInstance().setNewClass(true);
+		}
 
 		mainStage.close();
+	}
+
+	@FXML
+	public void onCloseClick() {
+		mainStage.close();
+	}
+
+	private void loadClass(GestureClass gesture_class) {
+		if (gesture_class == null)
+			return;
+
+		sessionListProperty.addAll(gesture_class.sessions);
 	}
 
 	private <T> boolean moveListItem(T item, List<T> list, int position, int distance) {

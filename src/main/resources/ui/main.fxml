@@ -44,8 +44,10 @@
 	</Separator>
 
 	<HBox alignment="CENTER">
-		<Button text="Test"
-				onMouseClicked="#onTestClick"/>
+		<Button fx:id="btnPlayPause"
+				prefWidth="50"
+				text="Play"
+				onMouseClicked="#onPlayPauseClick"/>
 		<Button text="Class"
 				onMouseClicked="#onClassClick"/>
 		<CheckBox fx:id="chkAlwaysOnTop"

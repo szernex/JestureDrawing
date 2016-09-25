@@ -11,6 +11,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -26,14 +27,13 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.szernex.java.jesturedrawing.C;
 import org.szernex.java.jesturedrawing.GestureClass;
 import org.szernex.java.jesturedrawing.R;
-import org.szernex.java.jsonconfig.JsonConfig;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.ResourceBundle;
 
@@ -50,6 +50,8 @@ public class MainController implements Initializable, TickListener, CustomContro
 	private Label lblSession;
 	@FXML
 	private Pane imageParent;
+	@FXML
+	private Button btnPlayPause;
 	@FXML
 	private CheckBox chkAlwaysOnTop;
 
@@ -130,24 +132,30 @@ public class MainController implements Initializable, TickListener, CustomContro
 	}
 
 	@FXML
-	public void onTestClick() {
-		JsonConfig<GestureClass> config = new JsonConfig<>(GestureClass.class);
-		GestureClass gestureClass = config.load(Paths.get("testclass.json"));
+	public void onPlayPauseClick() {
+		if (tickerTimeline == null)
+			return;
 
-		ticker = new Ticker(gestureClass);
-		ticker.addTickListener(this);
+		Animation.Status status = tickerTimeline.getStatus();
 
-		if (tickerTimeline != null)
-			tickerTimeline.stop();
+		if (status.equals(Animation.Status.PAUSED)) {
+			tickerTimeline.play();
 
-		tickerTimeline = new Timeline(
-				new KeyFrame(
-						Duration.seconds(1),
-						event -> ticker.tick()
-				)
-		);
-		tickerTimeline.setCycleCount(Animation.INDEFINITE);
-		tickerTimeline.playFromStart();
+			if (timerTimeline != null)
+				timerTimeline.play();
+
+			btnPlayPause.textProperty().set("Pause");
+		} else if (status.equals(Animation.Status.STOPPED)) {
+			tickerTimeline.playFromStart();
+			btnPlayPause.textProperty().set("Pause");
+		} else if (status.equals(Animation.Status.RUNNING)) {
+			tickerTimeline.pause();
+
+			if (timerTimeline != null)
+				timerTimeline.pause();
+
+			btnPlayPause.textProperty().set("Play");
+		}
 	}
 
 	@FXML
@@ -169,25 +177,33 @@ public class MainController implements Initializable, TickListener, CustomContro
 		if (loader.getController() instanceof CustomController)
 			((CustomController) loader.getController()).setStage(stage);
 
+		if (tickerTimeline != null && tickerTimeline.getStatus().equals(Animation.Status.RUNNING))
+			onPlayPauseClick();
+
 		mainStage.setAlwaysOnTop(false);
 		stage.showAndWait();
 		mainStage.setAlwaysOnTop(alwaysOnTop);
+
+		if (C.getInstance().isNewClass()) {
+			initializeTicker(C.getInstance().getGestureClass());
+		}
 	}
 
 	@Override
 	public void onTickStart(Ticker ticker) {
-
+		logger.traceEntry();
 	}
 
 	@Override
 	public void onTickEnd(Ticker ticker) {
-
+		logger.traceEntry();
 	}
 
 	@Override
 	public void onBreakStart(Ticker ticker) {
-		ivImage.setImage(new Image("images/break.png", R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
+		logger.traceEntry();
 
+		ivImage.setImage(new Image("images/break.png", R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
 		pbProgress.setProgress(0.0);
 		pbTimer.setProgress(0.0);
 
@@ -201,17 +217,18 @@ public class MainController implements Initializable, TickListener, CustomContro
 		timerTimeline.getKeyFrames().add(keyFrame);
 		timerTimeline.playFromStart();
 
-
 		System.gc();
 	}
 
 	@Override
 	public void onBreakEnd(Ticker ticker) {
-
+		logger.traceEntry();
 	}
 
 	@Override
 	public void onNewImage(Ticker ticker) {
+		logger.traceEntry();
+
 		Path image = ticker.getCurrentImage();
 
 		if (image == null) {
@@ -239,9 +256,28 @@ public class MainController implements Initializable, TickListener, CustomContro
 
 	@Override
 	public void onFinished(Ticker ticker) {
+		logger.traceEntry();
+
 		ivImage.setImage(new Image("images/finished.png", R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
 		tickerTimeline.stop();
 		timerTimeline.stop();
+	}
+
+	private void initializeTicker(GestureClass gesture_class) {
+		logger.debug("Initializing Ticker with GestureClass " + gesture_class);
+		ticker = new Ticker(gesture_class);
+		ticker.addTickListener(this);
+
+		if (tickerTimeline != null)
+			tickerTimeline.stop();
+
+		tickerTimeline = new Timeline(
+				new KeyFrame(
+						Duration.seconds(1),
+						event -> ticker.tick()
+				)
+		);
+		tickerTimeline.setCycleCount(Animation.INDEFINITE);
 	}
 
 	private EnumSet<BorderSide> isMouseAtBorder(Stage stage, double mouse_x, double mouse_y, double border_width) {
