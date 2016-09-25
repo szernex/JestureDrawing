@@ -1,5 +1,5 @@
 group 'org.szernex.java'
-version '0.0.1'
+version '0.0.1a'
 
 apply plugin: 'java'
 
