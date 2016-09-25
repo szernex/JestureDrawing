@@ -51,7 +51,7 @@ public class Ticker {
 		currentTimer = 0;
 		imageList = new ArrayList<>();
 
-		initializeNextSession();
+		currentSession = initializeNextSession();
 	}
 
 	public void tick() {
@@ -76,10 +76,14 @@ public class Ticker {
 			currentImageCount++;
 			tickListeners.forEach(listener -> listener.onNewImage(this));
 		} else {
-			if (initializeNextSession()) {
+			GestureClass.GestureSession nextSession = initializeNextSession();
+
+			if (nextSession != null) {
 				currentTimer = currentSession.break_after_session;
 				paused = true;
 				tickListeners.forEach(listener -> listener.onBreakStart(this));
+
+				currentSession = nextSession;
 			}
 		}
 
@@ -93,24 +97,24 @@ public class Ticker {
 		return images.get(random.nextInt(images.size()));
 	}
 
-	private boolean initializeNextSession() {
-		currentImage = null;
-		currentSession = null;
+	private GestureClass.GestureSession initializeNextSession() {
+		GestureClass.GestureSession session;
 
 		if (sessionIterator == null || !sessionIterator.hasNext()) {
 			finished = true;
 			tickListeners.forEach(listener -> listener.onFinished(this));
 
-			return false;
+			return null;
 		}
 
-		currentSession = sessionIterator.next();
+		session = sessionIterator.next();
+		currentImage = null;
 		imageList.clear();
-		imageList.addAll(getFileSet(currentSession.paths, currentSession.include_subdirs));
+		imageList.addAll(getFileSet(session.paths, session.include_subdirs));
 		finished = false;
 		currentImageCount = 0;
 
-		return true;
+		return session;
 	}
 
 	private Set<Path> getFileSet(List<String> paths, boolean recursive) {

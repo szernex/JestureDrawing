@@ -66,6 +66,8 @@ public class ClassController implements Initializable, CustomController, ChangeL
 
 			if (oldValue != null)
 				updateSession(oldValue);
+			else
+				updateSession(currentSession);
 
 			currentSession = newValue;
 
@@ -78,9 +80,6 @@ public class ClassController implements Initializable, CustomController, ChangeL
 			imageCountProperty.set(String.valueOf(currentSession.image_count));
 			intervalProperty.set(String.valueOf(currentSession.interval));
 			breakAfterProperty.set(String.valueOf(currentSession.break_after_session));
-
-			if (oldValue == null)
-				updateSession(newValue);
 		});
 
 
@@ -170,11 +169,12 @@ public class ClassController implements Initializable, CustomController, ChangeL
 		File file = fileChooser.showSaveDialog(mainStage);
 		logger.debug("Saving class file: " + file);
 
+		updateClass();
+
 		if (file == null || currentClass == null || currentClass.sessions.isEmpty())
 			return;
 
 		lastSaveFile = file;
-		updateClass();
 		config.save(currentClass, file.toPath());
 		logger.debug("Class saved");
 	}
@@ -217,6 +217,8 @@ public class ClassController implements Initializable, CustomController, ChangeL
 
 	@FXML
 	public void onAddSessionClick() {
+		updateSession(currentSession);
+
 		GestureClass.GestureSession session = new GestureClass.GestureSession();
 
 		sessionListProperty.add(session);
@@ -226,6 +228,7 @@ public class ClassController implements Initializable, CustomController, ChangeL
 	@FXML
 	public void onRemoveSessionClick() {
 		sessionListProperty.remove(lstSessions.getSelectionModel().getSelectedItem());
+		updateClass();
 	}
 
 	@FXML
@@ -280,7 +283,7 @@ public class ClassController implements Initializable, CustomController, ChangeL
 
 		int newPosition = position + distance;
 
-		if (newPosition < 0 || newPosition > list.size())
+		if (newPosition < 0 || newPosition >= list.size())
 			return false;
 
 		list.remove(position);
