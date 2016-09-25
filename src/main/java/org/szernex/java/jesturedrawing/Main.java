@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.szernex.java.jesturedrawing.ui.CustomController;
 import org.szernex.java.jsonconfig.JsonConfig;
 
+import java.io.IOException;
 import java.nio.file.Paths;
 
 public class Main extends Application {
@@ -31,7 +32,7 @@ public class Main extends Application {
 	}
 
 	@Override
-	public void start(Stage primaryStage) throws Exception {
+	public void start(Stage primaryStage) throws IOException {
 		logger.trace("Application started");
 
 		FXMLLoader loader = new FXMLLoader();

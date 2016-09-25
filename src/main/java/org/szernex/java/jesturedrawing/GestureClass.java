@@ -7,11 +7,16 @@ public class GestureClass {
 	public ArrayList<GestureSession> sessions = new ArrayList<>();
 
 	public static class GestureSession {
-		public String title = "Session";
+		public String title = "New Session";
 		public ArrayList<String> paths = new ArrayList<>();
 		public boolean include_subdirs = false;
 		public int image_count = 10;
 		public int interval = 30;
 		public int break_after_session = 30;
+
+		@Override
+		public String toString() {
+			return title;
+		}
 	}
 }

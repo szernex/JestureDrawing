@@ -7,7 +7,10 @@ import javafx.animation.Timeline;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -18,6 +21,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
@@ -26,6 +30,7 @@ import org.szernex.java.jesturedrawing.GestureClass;
 import org.szernex.java.jesturedrawing.R;
 import org.szernex.java.jsonconfig.JsonConfig;
 
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -125,7 +130,7 @@ public class MainController implements Initializable, TickListener, CustomContro
 	}
 
 	@FXML
-	public void onOptionsClick() {
+	public void onTestClick() {
 		JsonConfig<GestureClass> config = new JsonConfig<>(GestureClass.class);
 		GestureClass gestureClass = config.load(Paths.get("testclass.json"));
 
@@ -143,6 +148,30 @@ public class MainController implements Initializable, TickListener, CustomContro
 		);
 		tickerTimeline.setCycleCount(Animation.INDEFINITE);
 		tickerTimeline.playFromStart();
+	}
+
+	@FXML
+	public void onClassClick() throws IOException {
+		FXMLLoader loader = new FXMLLoader();
+
+		loader.setLocation(ClassLoader.getSystemResource("ui/options.fxml"));
+
+		Parent parent = loader.load();
+		Scene scene = new Scene(parent, 0, 0);
+		Stage stage = new Stage();
+		boolean alwaysOnTop = mainStage.isAlwaysOnTop();
+
+		stage.setWidth(400);
+		stage.setHeight(600);
+		stage.setScene(scene);
+		stage.initModality(Modality.APPLICATION_MODAL);
+
+		if (loader.getController() instanceof CustomController)
+			((CustomController) loader.getController()).setStage(stage);
+
+		mainStage.setAlwaysOnTop(false);
+		stage.showAndWait();
+		mainStage.setAlwaysOnTop(alwaysOnTop);
 	}
 
 	@Override

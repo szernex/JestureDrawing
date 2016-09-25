@@ -45,7 +45,9 @@
 
 	<HBox alignment="CENTER">
 		<Button text="Test"
-				onMouseClicked="#onOptionsClick"/>
+				onMouseClicked="#onTestClick"/>
+		<Button text="Class"
+				onMouseClicked="#onClassClick"/>
 		<CheckBox fx:id="chkAlwaysOnTop"
 				text="Always on top"/>
 	</HBox>

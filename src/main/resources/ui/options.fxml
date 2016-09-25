@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.szernex.java.jesturedrawing.ui.FilteredTextField?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+		fx:controller="org.szernex.java.jesturedrawing.ui.OptionsController"
+		minWidth="150"
+		minHeight="150"
+		alignment="TOP_CENTER">
+	<padding>
+		<Insets top="5" right="5" bottom="5" left="5"/>
+	</padding>
+
+	<HBox alignment="CENTER">
+		<Button text="Load Class"
+				onMouseClicked="#onLoadClassClick"/>
+		<Button text="Save Class"
+				onMouseClicked="#onSaveClassClick"/>
+	</HBox>
+
+	<VBox>
+		<HBox>
+			<ListView fx:id="lstSessions"
+					VBox.vgrow="ALWAYS"
+					HBox.hgrow="ALWAYS"
+					minHeight="50"/>
+			<VBox alignment="CENTER">
+				<Button text="//\\"
+						maxWidth="Infinity"
+						onAction="#onMoveSessionTopClick"/>
+				<Button text="/\"
+						maxWidth="Infinity"
+						onAction="#onMoveSessionUpClick"/>
+				<Button text="\\/"
+						maxWidth="Infinity"
+						onAction="#onMoveSessionDownClick"/>
+				<Button text="\\\//"
+						maxWidth="Infinity"
+						onAction="#onMoveSessionBottomClick"/>
+			</VBox>
+		</HBox>
+		<HBox alignment="CENTER">
+			<Button text="Add"
+					onAction="#onAddSessionClick"/>
+			<Button text="Remove"
+					onAction="#onRemoveSessionClick"/>
+		</HBox>
+	</VBox>
+
+	<VBox alignment="TOP_CENTER">
+		<VBox>
+			<Label text="Title"/>
+			<TextField fx:id="txtSessionTitle"/>
+		</VBox>
+
+		<VBox VBox.vgrow="ALWAYS">
+			<Label text="Paths"/>
+			<ListView fx:id="lstPaths"
+					VBox.vgrow="ALWAYS"
+					minHeight="100"
+					prefHeight="100"/>
+			<HBox alignment="CENTER">
+				<Button text="Add"
+						onAction="#onAddPathClick"/>
+				<Button text="Remove"
+						onAction="#onRemovePathClick"/>
+			</HBox>
+		</VBox>
+
+		<VBox>
+			<Label text="Include sub-directories"/>
+			<CheckBox fx:id="chkIncludeSubDirs"/>
+		</VBox>
+
+		<VBox>
+			<Label text="Image count"/>
+			<FilteredTextField fx:id="txtImageCount"
+					filterProperty="\\d*"/>
+		</VBox>
+
+		<VBox>
+			<Label text="Interval"/>
+			<FilteredTextField fx:id="txtInterval"
+					filterProperty="\\d*"/>
+		</VBox>
+
+		<VBox>
+			<Label text="Break after session"/>
+			<FilteredTextField fx:id="txtBreakAfter"
+					filterProperty="\\d*"/>
+		</VBox>
+	</VBox>
+
+	<Separator/>
+
+	<Button text="Close"
+			onAction="#onCloseClick"/>
+</VBox>
