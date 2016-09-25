@@ -17,16 +17,20 @@ import java.nio.file.Paths;
 public class Main extends Application {
 	private static final Logger logger = LogManager.getLogger(Main.class);
 
-	private static final JsonConfig<ApplicationConfig> jsonConfig = new JsonConfig<>(ApplicationConfig.class);
-	public static final ApplicationConfig applicationConfig = jsonConfig.load(Paths.get(R.CONFIG_FILE));
+	private static JsonConfig<ApplicationConfig> jsonConfig;
 
 	private Stage mainStage;
 
 	public static void main(String[] args) {
+		jsonConfig = new JsonConfig<>(ApplicationConfig.class);
+		ApplicationConfig applicationConfig = jsonConfig.load(Paths.get(R.CONFIG_FILE));
+
 		if (applicationConfig == null) {
 			logger.fatal("Application configuration could not be loaded, aborting");
 			System.exit(1);
 		}
+
+		C.getInstance().setApplicationConfig(applicationConfig);
 
 		launch(args);
 	}
@@ -35,6 +39,7 @@ public class Main extends Application {
 	public void start(Stage primaryStage) throws IOException {
 		logger.trace("Application started");
 
+		ApplicationConfig applicationConfig = C.getInstance().getApplicationConfig();
 		FXMLLoader loader = new FXMLLoader();
 
 		loader.setLocation(ClassLoader.getSystemResource("ui/main.fxml"));
@@ -64,6 +69,8 @@ public class Main extends Application {
 	@Override
 	public void stop() throws Exception {
 		super.stop();
+
+		ApplicationConfig applicationConfig = C.getInstance().getApplicationConfig();
 
 		applicationConfig.window.always_on_top = mainStage.isAlwaysOnTop();
 

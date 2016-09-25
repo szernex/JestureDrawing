@@ -14,6 +14,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.szernex.java.jesturedrawing.C;
 import org.szernex.java.jesturedrawing.GestureClass;
 import org.szernex.java.jsonconfig.JsonConfig;
 
@@ -85,8 +86,10 @@ public class OptionsController implements Initializable, CustomController, Chang
 		txtInterval.textProperty().bindBidirectional(intervalProperty);
 		txtBreakAfter.textProperty().bindBidirectional(breakAfterProperty);
 
-		// TODO try to load the currently loaded class instead of a fresh one by default
-		currentClass = initializeNewClass();
+		if (C.getInstance().getGestureClass() == null)
+			currentClass = initializeNewClass();
+		else
+			currentClass = C.getInstance().getGestureClass();
 	}
 
 	@Override
@@ -239,7 +242,9 @@ public class OptionsController implements Initializable, CustomController, Chang
 
 	@FXML
 	public void onCloseClick() {
-		// TODO set global class object
+		if (currentClass != null && !currentClass.sessions.isEmpty())
+			C.getInstance().setGestureClass(currentClass);
+
 		mainStage.close();
 	}
 
