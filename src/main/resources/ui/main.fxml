@@ -47,10 +47,12 @@
 		<Button fx:id="btnPlayPause"
 				prefWidth="50"
 				text="Play"
-				onMouseClicked="#onPlayPauseClick"/>
+				onAction="#onPlayPauseClick"/>
 		<Button text="Class"
-				onMouseClicked="#onClassClick"/>
+				onAction="#onClassClick"/>
 		<CheckBox fx:id="chkAlwaysOnTop"
 				text="Always on top"/>
+		<Button text="Exit"
+				onAction="#onExitClick"/>
 	</HBox>
 </VBox>

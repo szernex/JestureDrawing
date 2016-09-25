@@ -131,6 +131,71 @@ public class MainController implements Initializable, TickListener, CustomContro
 		}
 	}
 
+	@Override
+	public void onTickStart(Ticker ticker) {
+	}
+
+	@Override
+	public void onTickEnd(Ticker ticker) {
+	}
+
+	@Override
+	public void onBreakStart(Ticker ticker) {
+		ivImage.setImage(new Image("images/break.png", R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
+		pbProgress.setProgress(0.0);
+		pbTimer.setProgress(0.0);
+
+		KeyValue keyValue = new KeyValue(pbTimer.progressProperty(), (1.0 + (1.0 / ticker.getCurrentSession().break_after_session))); // for some reason the target has to be set to above 1.0 or the bar won't fill before the image changes
+		KeyFrame keyFrame = new KeyFrame(Duration.seconds(ticker.getCurrentSession().break_after_session), keyValue);
+
+		if (timerTimeline != null)
+			timerTimeline.stop();
+
+		timerTimeline = new Timeline();
+		timerTimeline.getKeyFrames().add(keyFrame);
+		timerTimeline.playFromStart();
+
+		System.gc();
+	}
+
+	@Override
+	public void onBreakEnd(Ticker ticker) {
+	}
+
+	@Override
+	public void onNewImage(Ticker ticker) {
+		Path image = ticker.getCurrentImage();
+
+		if (image == null) {
+			ivImage.setImage(new Image("images/noimage.png", R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
+		} else if (!image.equals(currentImage)) {
+			ivImage.setImage(new Image(image.toUri().toString(), R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
+		}
+
+		sessionTitle.set(ticker.getCurrentSession().title);
+		pbProgress.setProgress((1.0 / ticker.getCurrentSession().image_count) * ticker.getCurrentImageCount());
+		pbTimer.setProgress(0.0);
+
+		KeyValue keyValue = new KeyValue(pbTimer.progressProperty(), (1.0 + (1.0 / ticker.getCurrentSession().interval))); // for some reason the target has to be set to above 1.0 or the bar won't fill before the image changes
+		KeyFrame keyFrame = new KeyFrame(Duration.seconds(ticker.getCurrentSession().interval), keyValue);
+
+		if (timerTimeline != null)
+			timerTimeline.stop();
+
+		timerTimeline = new Timeline();
+		timerTimeline.getKeyFrames().add(keyFrame);
+		timerTimeline.playFromStart();
+
+		System.gc();
+	}
+
+	@Override
+	public void onFinished(Ticker ticker) {
+		ivImage.setImage(new Image("images/finished.png", R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
+		tickerTimeline.stop();
+		timerTimeline.stop();
+	}
+
 	@FXML
 	public void onPlayPauseClick() {
 		if (tickerTimeline == null)
@@ -162,7 +227,7 @@ public class MainController implements Initializable, TickListener, CustomContro
 	public void onClassClick() throws IOException {
 		FXMLLoader loader = new FXMLLoader();
 
-		loader.setLocation(ClassLoader.getSystemResource("ui/options.fxml"));
+		loader.setLocation(ClassLoader.getSystemResource("ui/class.fxml"));
 
 		Parent parent = loader.load();
 		Scene scene = new Scene(parent, 0, 0);
@@ -189,82 +254,17 @@ public class MainController implements Initializable, TickListener, CustomContro
 		}
 	}
 
-	@Override
-	public void onTickStart(Ticker ticker) {
-		logger.traceEntry();
-	}
-
-	@Override
-	public void onTickEnd(Ticker ticker) {
-		logger.traceEntry();
-	}
-
-	@Override
-	public void onBreakStart(Ticker ticker) {
-		logger.traceEntry();
-
-		ivImage.setImage(new Image("images/break.png", R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
-		pbProgress.setProgress(0.0);
-		pbTimer.setProgress(0.0);
-
-		KeyValue keyValue = new KeyValue(pbTimer.progressProperty(), (1.0 + (1.0 / ticker.getCurrentSession().break_after_session))); // for some reason the target has to be set to above 1.0 or the bar won't fill before the image changes
-		KeyFrame keyFrame = new KeyFrame(Duration.seconds(ticker.getCurrentSession().break_after_session), keyValue);
-
-		if (timerTimeline != null)
-			timerTimeline.stop();
-
-		timerTimeline = new Timeline();
-		timerTimeline.getKeyFrames().add(keyFrame);
-		timerTimeline.playFromStart();
-
-		System.gc();
-	}
-
-	@Override
-	public void onBreakEnd(Ticker ticker) {
-		logger.traceEntry();
-	}
-
-	@Override
-	public void onNewImage(Ticker ticker) {
-		logger.traceEntry();
-
-		Path image = ticker.getCurrentImage();
-
-		if (image == null) {
-			ivImage.setImage(new Image("images/test.png", R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
-		} else if (!image.equals(currentImage)) {
-			ivImage.setImage(new Image(image.toUri().toString(), R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
-		}
-
-		sessionTitle.set(ticker.getCurrentSession().title);
-		pbProgress.setProgress((1.0 / ticker.getCurrentSession().image_count) * ticker.getCurrentImageCount());
-		pbTimer.setProgress(0.0);
-
-		KeyValue keyValue = new KeyValue(pbTimer.progressProperty(), (1.0 + (1.0 / ticker.getCurrentSession().interval))); // for some reason the target has to be set to above 1.0 or the bar won't fill before the image changes
-		KeyFrame keyFrame = new KeyFrame(Duration.seconds(ticker.getCurrentSession().interval), keyValue);
-
-		if (timerTimeline != null)
-			timerTimeline.stop();
-
-		timerTimeline = new Timeline();
-		timerTimeline.getKeyFrames().add(keyFrame);
-		timerTimeline.playFromStart();
-
-		System.gc();
-	}
-
-	@Override
-	public void onFinished(Ticker ticker) {
-		logger.traceEntry();
-
-		ivImage.setImage(new Image("images/finished.png", R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
-		tickerTimeline.stop();
-		timerTimeline.stop();
+	@FXML
+	public void onExitClick() {
+		mainStage.close();
 	}
 
 	private void initializeTicker(GestureClass gesture_class) {
 		logger.debug("Initializing Ticker with GestureClass " + gesture_class);
+
+		if (gesture_class == null)
+			return;
+
 		ticker = new Ticker(gesture_class);
 		ticker.addTickListener(this);
 
@@ -278,6 +278,8 @@ public class MainController implements Initializable, TickListener, CustomContro
 				)
 		);
 		tickerTimeline.setCycleCount(Animation.INDEFINITE);
+
+		logger.debug("Ticker initialized");
 	}
 
 	private EnumSet<BorderSide> isMouseAtBorder(Stage stage, double mouse_x, double mouse_y, double border_width) {

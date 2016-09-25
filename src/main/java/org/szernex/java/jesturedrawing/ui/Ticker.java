@@ -21,8 +21,9 @@ public class Ticker {
 	private Path currentImage;
 	private Random random;
 	private HashSet<TickListener> tickListeners = new HashSet<>();
-	public Ticker(GestureClass gestureClass) {
-		initialize(gestureClass);
+
+	public Ticker(GestureClass gesture_class) {
+		initialize(gesture_class);
 	}
 
 	public Path getCurrentImage() {
@@ -41,8 +42,11 @@ public class Ticker {
 		tickListeners.add(listener);
 	}
 
-	public void initialize(GestureClass gestureClass) {
-		sessionIterator = gestureClass.sessions.listIterator();
+	public void initialize(GestureClass gesture_class) {
+		if (gesture_class == null)
+			return;
+
+		sessionIterator = gesture_class.sessions.listIterator();
 		random = new Random(System.currentTimeMillis());
 		currentTimer = 0;
 		imageList = new ArrayList<>();

@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import org.szernex.java.jesturedrawing.ui.FilteredTextField?>
 <VBox xmlns:fx="http://javafx.com/fxml"
-		fx:controller="org.szernex.java.jesturedrawing.ui.OptionsController"
+		fx:controller="org.szernex.java.jesturedrawing.ui.ClassController"
 		minWidth="150"
 		minHeight="150"
 		alignment="TOP_CENTER">

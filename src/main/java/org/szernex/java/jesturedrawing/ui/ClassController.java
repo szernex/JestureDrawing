@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-public class OptionsController implements Initializable, CustomController, ChangeListener<String> {
-	private final Logger logger = LogManager.getLogger(OptionsController.class);
+public class ClassController implements Initializable, CustomController, ChangeListener<String> {
+	private final Logger logger = LogManager.getLogger(ClassController.class);
 	private final JsonConfig<GestureClass> config = new JsonConfig<>(GestureClass.class);
 	@FXML
 	private ListView<GestureClass.GestureSession> lstSessions;
@@ -64,7 +64,9 @@ public class OptionsController implements Initializable, CustomController, Chang
 			if (newValue == null)
 				return;
 
-			updateSession();
+			if (oldValue != null)
+				updateSession(oldValue);
+
 			currentSession = newValue;
 
 			// this basically converts the json object to a properties object
@@ -76,6 +78,9 @@ public class OptionsController implements Initializable, CustomController, Chang
 			imageCountProperty.set(String.valueOf(currentSession.image_count));
 			intervalProperty.set(String.valueOf(currentSession.interval));
 			breakAfterProperty.set(String.valueOf(currentSession.break_after_session));
+
+			if (oldValue == null)
+				updateSession(newValue);
 		});
 
 
@@ -247,8 +252,9 @@ public class OptionsController implements Initializable, CustomController, Chang
 
 	@FXML
 	public void onApplyClick() {
+		updateClass();
+
 		if (currentClass != null && !currentClass.sessions.isEmpty()) {
-			updateClass();
 			C.getInstance().setGestureClass(currentClass);
 			C.getInstance().setNewClass(true);
 		}
@@ -284,6 +290,8 @@ public class OptionsController implements Initializable, CustomController, Chang
 	}
 
 	private GestureClass initializeNewClass() {
+		logger.trace("Initializing new class");
+
 		GestureClass gestureClass = new GestureClass();
 
 		sessionListProperty.clear();
@@ -298,36 +306,40 @@ public class OptionsController implements Initializable, CustomController, Chang
 	}
 
 	private void updateClass() {
+		logger.trace("Updating class " + currentClass);
+
 		if (currentClass == null)
 			return;
 
-		updateSession();
+		updateSession(currentSession);
 
 		currentClass.sessions.clear();
 		currentClass.sessions.addAll(sessionListProperty);
 	}
 
-	private void updateSession() {
-		if (currentSession == null)
+	private void updateSession(GestureClass.GestureSession gesture_session) {
+		logger.trace("Updating session " + gesture_session);
+
+		if (gesture_session == null)
 			return;
 
-		currentSession.title = sessionTitleProperty.get();
-		currentSession.paths.clear();
-		currentSession.paths.addAll(pathListProperty);
-		currentSession.include_subdirs = includeSubDirsProperty.get();
+		gesture_session.title = sessionTitleProperty.get();
+		gesture_session.paths.clear();
+		gesture_session.paths.addAll(pathListProperty);
+		gesture_session.include_subdirs = includeSubDirsProperty.get();
 
 		try {
-			currentSession.image_count = Integer.valueOf(imageCountProperty.get());
+			gesture_session.image_count = Integer.valueOf(imageCountProperty.get());
 		} catch (NumberFormatException ignored) {
 		}
 
 		try {
-			currentSession.interval = Integer.valueOf(intervalProperty.get());
+			gesture_session.interval = Integer.valueOf(intervalProperty.get());
 		} catch (NumberFormatException ignored) {
 		}
 
 		try {
-			currentSession.break_after_session = Integer.valueOf(breakAfterProperty.get());
+			gesture_session.break_after_session = Integer.valueOf(breakAfterProperty.get());
 		} catch (NumberFormatException ignored) {
 		}
 	}
