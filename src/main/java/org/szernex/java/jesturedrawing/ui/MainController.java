@@ -12,7 +12,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.effect.DropShadow;
@@ -27,6 +26,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.szernex.java.jesturedrawing.ApplicationConfig;
 import org.szernex.java.jesturedrawing.C;
 import org.szernex.java.jesturedrawing.GestureClass;
 import org.szernex.java.jesturedrawing.R;
@@ -52,8 +52,6 @@ public class MainController implements Initializable, TickListener, CustomContro
 	private Pane imageParent;
 	@FXML
 	private Button btnPlayPause;
-	@FXML
-	private CheckBox chkAlwaysOnTop;
 
 	private Stage mainStage;
 	private ResizableImageView ivImage;
@@ -61,13 +59,15 @@ public class MainController implements Initializable, TickListener, CustomContro
 	private Path currentImage = null;
 	private Timeline tickerTimeline;
 	private Timeline timerTimeline;
-	private SimpleStringProperty sessionTitle = new SimpleStringProperty();
 	private double moveOffsetX = 0.0;
 	private double moveOffsetY = 0.0;
 	private double resizeOffsetX = 0.0;
 	private double resizeOffsetY = 0.0;
 	private boolean resizing = false;
 	private EnumSet<BorderSide> resizingSides = EnumSet.noneOf(BorderSide.class);
+
+	private SimpleStringProperty sessionTitleProperty = new SimpleStringProperty();
+	private SimpleStringProperty playPauseTextProperty = new SimpleStringProperty();
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -76,10 +76,13 @@ public class MainController implements Initializable, TickListener, CustomContro
 		dropShadow.setColor(Color.color(1.0, 1.0, 1.0));
 		lblSession.setEffect(dropShadow);
 		lblSession.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 18));
-		lblSession.textProperty().bind(sessionTitle);
+		lblSession.textProperty().bind(sessionTitleProperty);
 
 		ivImage = new ResizableImageView();
 		imageParent.getChildren().add(ivImage);
+
+		playPauseTextProperty.set("Play");
+		btnPlayPause.textProperty().bind(playPauseTextProperty);
 
 		mainContainer.getStylesheets().add("css/style.css");
 
@@ -91,8 +94,20 @@ public class MainController implements Initializable, TickListener, CustomContro
 	public void setStage(Stage stage) {
 		mainStage = stage;
 
-		chkAlwaysOnTop.selectedProperty().set(mainStage.isAlwaysOnTop());
-		chkAlwaysOnTop.selectedProperty().addListener((observable, oldValue, newValue) -> mainStage.setAlwaysOnTop(newValue));
+		/*chkAlwaysOnTop.selectedProperty().set(mainStage.isAlwaysOnTop());
+		chkAlwaysOnTop.selectedProperty().addListener((observable, oldValue, newValue) -> mainStage.setAlwaysOnTop(newValue));*/
+
+		ApplicationConfig config = C.getInstance().getApplicationConfig();
+
+		// we don't want these values to always be loaded when we re-initialize from config
+		mainStage.setMaximized(config.window.maximized);
+		mainStage.setWidth(config.window.width);
+		mainStage.setHeight(config.window.height);
+		mainStage.setX(config.window.pos_x);
+		mainStage.setY(config.window.pos_y);
+
+		initializeFromConfig(config);
+		//primaryStage.setOpacity(0.5);
 	}
 
 	@Override
@@ -141,6 +156,8 @@ public class MainController implements Initializable, TickListener, CustomContro
 
 	@Override
 	public void onBreakStart(Ticker ticker) {
+		pbTimer.setVisible(true);
+
 		ivImage.setImage(new Image("images/break.png", R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
 		pbProgress.setProgress(0.0);
 		pbTimer.setProgress(0.0);
@@ -166,13 +183,15 @@ public class MainController implements Initializable, TickListener, CustomContro
 	public void onNewImage(Ticker ticker) {
 		Path image = ticker.getCurrentImage();
 
+		pbTimer.setVisible(C.getInstance().getApplicationConfig().timerEnabled);
+
 		if (image == null) {
 			ivImage.setImage(new Image("images/noimage.png", R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
 		} else if (!image.equals(currentImage)) {
 			ivImage.setImage(new Image(image.toUri().toString(), R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
 		}
 
-		sessionTitle.set(ticker.getCurrentSession().title);
+		sessionTitleProperty.set(ticker.getCurrentSession().title);
 		pbProgress.setProgress((1.0 / ticker.getCurrentSession().image_count) * ticker.getCurrentImageCount());
 		pbTimer.setProgress(0.0);
 
@@ -205,21 +224,13 @@ public class MainController implements Initializable, TickListener, CustomContro
 
 		if (status.equals(Animation.Status.PAUSED)) {
 			tickerTimeline.play();
-
-			if (timerTimeline != null)
-				timerTimeline.play();
-
-			btnPlayPause.textProperty().set("Pause");
+			//playPauseTextProperty.set("Pause");
 		} else if (status.equals(Animation.Status.STOPPED)) {
 			tickerTimeline.playFromStart();
-			btnPlayPause.textProperty().set("Pause");
+			//playPauseTextProperty.set("Pause");
 		} else if (status.equals(Animation.Status.RUNNING)) {
 			tickerTimeline.pause();
-
-			if (timerTimeline != null)
-				timerTimeline.pause();
-
-			btnPlayPause.textProperty().set("Play");
+			//playPauseTextProperty.set("Play");
 		}
 	}
 
@@ -249,7 +260,7 @@ public class MainController implements Initializable, TickListener, CustomContro
 			((CustomController) loader.getController()).setStage(stage);
 
 		if (tickerTimeline != null && tickerTimeline.getStatus().equals(Animation.Status.RUNNING))
-			onPlayPauseClick();
+			tickerTimeline.pause();
 
 		mainStage.setAlwaysOnTop(false);
 		stage.showAndWait();
@@ -261,8 +272,46 @@ public class MainController implements Initializable, TickListener, CustomContro
 	}
 
 	@FXML
+	public void onOptionsClick() throws IOException {
+		FXMLLoader loader = new FXMLLoader();
+
+		loader.setLocation(ClassLoader.getSystemResource("ui/options.fxml"));
+
+		Parent parent = loader.load();
+		Scene scene = new Scene(parent, 0, 0);
+		Stage stage = new Stage();
+		boolean alwaysOnTop = mainStage.isAlwaysOnTop();
+
+		stage.setWidth(400);
+		stage.setHeight(600);
+		stage.setScene(scene);
+		stage.initModality(Modality.APPLICATION_MODAL);
+
+		if (loader.getController() instanceof CustomController)
+			((CustomController) loader.getController()).setStage(stage);
+
+		if (tickerTimeline != null && tickerTimeline.getStatus().equals(Animation.Status.RUNNING))
+			tickerTimeline.pause();
+
+		mainStage.setAlwaysOnTop(false);
+		stage.showAndWait();
+		mainStage.setAlwaysOnTop(alwaysOnTop);
+
+		if (C.getInstance().isNewConfig())
+			initializeFromConfig(C.getInstance().getApplicationConfig());
+	}
+
+	@FXML
 	public void onExitClick() {
 		mainStage.close();
+	}
+
+	private void initializeFromConfig(ApplicationConfig config) {
+		mainStage.setAlwaysOnTop(config.window.always_on_top);
+		mainStage.setOpacity(config.window.opacity);
+
+		if (ticker != null && !ticker.isPaused())
+			pbTimer.setVisible(config.timerEnabled);
 	}
 
 	private void initializeTicker(GestureClass gesture_class) {
@@ -284,6 +333,20 @@ public class MainController implements Initializable, TickListener, CustomContro
 				)
 		);
 		tickerTimeline.setCycleCount(Animation.INDEFINITE);
+
+		tickerTimeline.statusProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue.equals(Animation.Status.RUNNING)) {
+				playPauseTextProperty.set("Pause");
+
+				if (timerTimeline != null)
+					timerTimeline.play();
+			} else if (newValue.equals(Animation.Status.PAUSED) || newValue.equals(Animation.Status.STOPPED)) {
+				playPauseTextProperty.set("Play");
+
+				if (timerTimeline != null)
+					timerTimeline.pause();
+			}
+		});
 
 		logger.debug("Ticker initialized");
 	}

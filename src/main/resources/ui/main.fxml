@@ -15,17 +15,19 @@
 		<Insets top="5" right="5" bottom="5" left="5"/>
 	</padding>
 
-	<ProgressBar fx:id="pbTimer"
-			minHeight="12"
-			maxWidth="Infinity"
-			progress="0"/>
-	<StackPane>
-		<ProgressBar fx:id="pbProgress"
-				minHeight="25"
+	<VBox>
+		<StackPane>
+			<ProgressBar fx:id="pbProgress"
+					minHeight="25"
+					maxWidth="Infinity"
+					progress="0"/>
+			<Label fx:id="lblSession"/>
+		</StackPane>
+		<ProgressBar fx:id="pbTimer"
+				minHeight="12"
 				maxWidth="Infinity"
 				progress="0"/>
-		<Label fx:id="lblSession"/>
-	</StackPane>
+	</VBox>
 
 	<Separator>
 		<padding>
@@ -61,8 +63,8 @@
 		<Button text="Class"
 				onAction="#onClassClick"/>
 
-		<CheckBox fx:id="chkAlwaysOnTop"
-				text="Always on top"/>
+		<Button text="Options"
+				onAction="#onOptionsClick"/>
 
 		<Separator orientation="VERTICAL">
 			<padding>

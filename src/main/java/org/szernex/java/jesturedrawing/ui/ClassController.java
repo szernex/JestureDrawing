@@ -116,6 +116,7 @@ public class ClassController implements Initializable, CustomController, ChangeL
 	@Override
 	public void setStage(Stage stage) {
 		mainStage = stage;
+		mainStage.setTitle("Class configuration");
 	}
 
 	@FXML

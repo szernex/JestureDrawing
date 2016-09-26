@@ -7,6 +7,7 @@ public final class C {
 	private ApplicationConfig applicationConfig = null;
 	private GestureClass gestureClass = null;
 	private boolean newClass = false;
+	private boolean newConfig = false;
 
 	public static C getInstance() {
 		return instance;
@@ -34,5 +35,13 @@ public final class C {
 
 	public void setNewClass(boolean newClass) {
 		this.newClass = newClass;
+	}
+
+	public boolean isNewConfig() {
+		return newConfig;
+	}
+
+	public void setNewConfig(boolean newConfig) {
+		this.newConfig = newConfig;
 	}
 }

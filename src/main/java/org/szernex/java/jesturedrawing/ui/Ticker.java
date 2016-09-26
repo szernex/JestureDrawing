@@ -38,6 +38,10 @@ public class Ticker {
 		return currentImageCount;
 	}
 
+	public boolean isPaused() {
+		return paused;
+	}
+
 	public void addTickListener(TickListener listener) {
 		tickListeners.add(listener);
 	}

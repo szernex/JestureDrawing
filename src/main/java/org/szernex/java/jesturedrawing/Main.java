@@ -39,7 +39,7 @@ public class Main extends Application {
 	public void start(Stage primaryStage) throws IOException {
 		logger.trace("Application started");
 
-		ApplicationConfig applicationConfig = C.getInstance().getApplicationConfig();
+
 		FXMLLoader loader = new FXMLLoader();
 
 		loader.setLocation(ClassLoader.getSystemResource("ui/main.fxml"));
@@ -47,23 +47,14 @@ public class Main extends Application {
 		Parent parent = loader.load();
 		Scene scene = new Scene(parent, 0, 0);
 
-		primaryStage.setTitle(R.APPLICATION_TITLE);
-		primaryStage.setAlwaysOnTop(applicationConfig.window.always_on_top);
-		primaryStage.setMaximized(applicationConfig.window.maximized);
-		primaryStage.setWidth(applicationConfig.window.width);
-		primaryStage.setHeight(applicationConfig.window.height);
-		primaryStage.setX(applicationConfig.window.pos_x);
-		primaryStage.setY(applicationConfig.window.pos_y);
-		//primaryStage.setOpacity(0.5);
-		primaryStage.initStyle(StageStyle.UNDECORATED);
-
-		primaryStage.setScene(scene);
-		primaryStage.show();
-
 		mainStage = primaryStage;
+		mainStage.setTitle(R.APPLICATION_TITLE);
+		mainStage.initStyle(StageStyle.UNDECORATED);
+		mainStage.setScene(scene);
+		mainStage.show();
 
 		if (loader.getController() instanceof CustomController)
-			((CustomController) loader.getController()).setStage(primaryStage);
+			((CustomController) loader.getController()).setStage(mainStage);
 	}
 
 	@Override
