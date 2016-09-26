@@ -48,6 +48,8 @@
 				prefWidth="50"
 				text="Play"
 				onAction="#onPlayPauseClick"/>
+		<Button text="Skip"
+				onAction="#onSkipClick"/>
 		<Button text="Class"
 				onAction="#onClassClick"/>
 		<CheckBox fx:id="chkAlwaysOnTop"

@@ -54,6 +54,10 @@ public class Ticker {
 		currentSession = initializeNextSession();
 	}
 
+	public void skip() {
+		currentTimer = 0;
+	}
+
 	public void tick() {
 		if (finished)
 			return;

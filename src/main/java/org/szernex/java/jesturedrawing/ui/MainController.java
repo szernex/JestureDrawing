@@ -224,6 +224,12 @@ public class MainController implements Initializable, TickListener, CustomContro
 	}
 
 	@FXML
+	public void onSkipClick() {
+		if (ticker != null)
+			ticker.skip();
+	}
+
+	@FXML
 	public void onClassClick() throws IOException {
 		FXMLLoader loader = new FXMLLoader();
 
