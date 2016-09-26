@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <VBox xmlns:fx="http://javafx.com/fxml"
@@ -48,12 +48,28 @@
 				prefWidth="50"
 				text="Play"
 				onAction="#onPlayPauseClick"/>
+
 		<Button text="Skip"
 				onAction="#onSkipClick"/>
+
+		<Separator orientation="VERTICAL">
+			<padding>
+				<Insets left="5" right="5"/>
+			</padding>
+		</Separator>
+
 		<Button text="Class"
 				onAction="#onClassClick"/>
+
 		<CheckBox fx:id="chkAlwaysOnTop"
 				text="Always on top"/>
+
+		<Separator orientation="VERTICAL">
+			<padding>
+				<Insets left="5" right="5"/>
+			</padding>
+		</Separator>
+
 		<Button text="Exit"
 				onAction="#onExitClick"/>
 	</HBox>
