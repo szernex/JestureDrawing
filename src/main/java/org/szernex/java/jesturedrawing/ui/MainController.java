@@ -217,7 +217,7 @@ public class MainController implements Initializable, TickListener, CustomContro
 
 	@FXML
 	public void onNewImageClick() {
-		if (ticker != null)
+		if (ticker != null && !ticker.isPaused())
 			ticker.nextRandomImage();
 	}
 
