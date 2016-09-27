@@ -54,7 +54,6 @@ public class Ticker {
 		random = new Random(System.currentTimeMillis());
 		currentTimer = 0;
 		imageList = new ArrayList<>();
-
 		currentSession = initializeNextSession();
 	}
 
@@ -79,10 +78,8 @@ public class Ticker {
 		}
 
 		if (currentImageCount < currentSession.image_count) {
-			currentImage = getRandomImage(imageList);
-			currentTimer = currentSession.interval;
 			currentImageCount++;
-			tickListeners.forEach(listener -> listener.onNewImage(this));
+			nextRandomImage();
 		} else {
 			GestureClass.GestureSession nextSession = initializeNextSession();
 
@@ -98,11 +95,13 @@ public class Ticker {
 		tickListeners.forEach(listener -> listener.onTickEnd(this));
 	}
 
-	private Path getRandomImage(List<Path> images) {
-		if (images == null || images.isEmpty())
-			return null;
+	public void nextRandomImage() {
+		if (imageList == null || imageList.isEmpty() || currentSession == null)
+			return;
 
-		return images.get(random.nextInt(images.size()));
+		currentImage = imageList.get(random.nextInt(imageList.size()));
+		currentTimer = currentSession.interval;
+		tickListeners.forEach(listener -> listener.onNewImage(this));
 	}
 
 	private GestureClass.GestureSession initializeNextSession() {

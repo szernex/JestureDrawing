@@ -54,6 +54,9 @@
 		<Button text="Skip"
 				onAction="#onSkipClick"/>
 
+		<Button text="New image"
+				onAction="#onNewImageClick"/>
+
 		<Separator orientation="VERTICAL">
 			<padding>
 				<Insets left="5" right="5"/>
