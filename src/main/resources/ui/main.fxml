@@ -57,6 +57,9 @@
 		<Button text="New image"
 				onAction="#onNewImageClick"/>
 
+		<Button text="Stop"
+				onAction="#onStopClick"/>
+
 		<Separator orientation="VERTICAL">
 			<padding>
 				<Insets left="5" right="5"/>

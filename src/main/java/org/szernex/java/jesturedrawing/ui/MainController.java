@@ -4,6 +4,7 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -67,6 +68,7 @@ public class MainController implements Initializable, TickListener, CustomContro
 	private EnumSet<BorderSide> resizingSides = EnumSet.noneOf(BorderSide.class);
 
 	private SimpleStringProperty sessionTitleProperty = new SimpleStringProperty();
+	private SimpleDoubleProperty progressProperty = new SimpleDoubleProperty();
 	private SimpleStringProperty playPauseTextProperty = new SimpleStringProperty();
 
 	@Override
@@ -77,6 +79,8 @@ public class MainController implements Initializable, TickListener, CustomContro
 		lblSession.setEffect(dropShadow);
 		lblSession.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 18));
 		lblSession.textProperty().bind(sessionTitleProperty);
+		pbProgress.progressProperty().bind(progressProperty);
+		progressProperty.set(0.0);
 
 		ivImage = new ResizableImageView();
 		imageParent.getChildren().add(ivImage);
@@ -159,8 +163,7 @@ public class MainController implements Initializable, TickListener, CustomContro
 		pbTimer.setVisible(true);
 
 		ivImage.setImage(new Image("images/break.png", R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
-		pbProgress.setProgress(0.0);
-		pbTimer.setProgress(0.0);
+		progressProperty.set(0.0);
 
 		resetTimer(ticker.getCurrentSession().break_after_session);
 
@@ -184,7 +187,7 @@ public class MainController implements Initializable, TickListener, CustomContro
 		}
 
 		sessionTitleProperty.set(ticker.getCurrentSession().title);
-		pbProgress.setProgress((1.0 / ticker.getCurrentSession().image_count) * ticker.getCurrentImageCount());
+		progressProperty.set((1.0 / ticker.getCurrentSession().image_count) * ticker.getCurrentImageCount());
 
 		resetTimer(ticker.getCurrentSession().interval);
 
@@ -227,6 +230,11 @@ public class MainController implements Initializable, TickListener, CustomContro
 	public void onNewImageClick() {
 		if (ticker != null)
 			ticker.nextRandomImage();
+	}
+
+	@FXML
+	public void onStopClick() {
+		initializeTicker(C.getInstance().getGestureClass());
 	}
 
 	@FXML
@@ -296,19 +304,20 @@ public class MainController implements Initializable, TickListener, CustomContro
 	}
 
 	private void resetTimer(int duration) {
-		// Re-initialize the timer
-		pbTimer.setProgress(0.0);
-
-		KeyValue keyValue = new KeyValue(pbTimer.progressProperty(), (1.0 + (1.0 / duration))); // for some reason the target has to be set to above 1.0 or the bar won't fill before the image changes
-		KeyFrame keyFrame = new KeyFrame(Duration.seconds(duration), keyValue);
-
 		if (timerTimeline == null)
 			timerTimeline = new Timeline();
 
+		pbTimer.setProgress(0.0);
 		timerTimeline.stop();
-		timerTimeline.getKeyFrames().clear();
-		timerTimeline.getKeyFrames().add(keyFrame);
-		timerTimeline.playFromStart();
+
+		if (duration > 0) {
+			KeyValue keyValue = new KeyValue(pbTimer.progressProperty(), (1.0 + (1.0 / duration))); // for some reason the target has to be set to above 1.0 or the bar won't fill before the image changes
+			KeyFrame keyFrame = new KeyFrame(Duration.seconds(duration), keyValue);
+
+			timerTimeline.getKeyFrames().clear();
+			timerTimeline.getKeyFrames().add(keyFrame);
+			timerTimeline.playFromStart();
+		}
 	}
 
 	private void initializeFromConfig(ApplicationConfig config) {
@@ -343,7 +352,7 @@ public class MainController implements Initializable, TickListener, CustomContro
 			if (newValue.equals(Animation.Status.RUNNING)) {
 				playPauseTextProperty.set("Pause");
 
-				if (timerTimeline != null)
+				if (timerTimeline != null && timerTimeline.getStatus().equals(Animation.Status.PAUSED))
 					timerTimeline.play();
 			} else if (newValue.equals(Animation.Status.PAUSED) || newValue.equals(Animation.Status.STOPPED)) {
 				playPauseTextProperty.set("Play");
@@ -352,6 +361,9 @@ public class MainController implements Initializable, TickListener, CustomContro
 					timerTimeline.pause();
 			}
 		});
+
+		progressProperty.set(0.0);
+		resetTimer(0);
 
 		logger.debug("Ticker initialized");
 	}
