@@ -1,5 +1,5 @@
 group 'org.szernex.java'
-version '0.0.2a'
+version '0.0.3a'
 
 apply plugin: 'java'
 
@@ -18,17 +18,20 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.6.2'
 }
 
-task copyLibs(type: Copy) {
-    into "$buildDir/libs/lib"
-    from configurations.runtime
-}
-
-jar.dependsOn(copyLibs)
-
 jar {
     manifest {
         attributes 'Main-Class': mainClassName,
-                'Version': version,
-                'Class-Path': configurations.runtime.files.collect { "lib/$it.name" }.join(" ")
+                'Version': version
     }
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': mainClassName
+        attributes 'Version': version
+    }
+
+    baseName = project.name + "-all"
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }
