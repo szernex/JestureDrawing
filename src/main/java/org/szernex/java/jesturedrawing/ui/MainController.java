@@ -40,7 +40,6 @@ import java.util.ResourceBundle;
 
 public class MainController implements Initializable, TickListener, CustomController, EventHandler<MouseEvent> {
 	private static final Logger logger = LogManager.getLogger(MainController.class);
-
 	@FXML
 	private Pane mainContainer;
 	@FXML
@@ -53,7 +52,6 @@ public class MainController implements Initializable, TickListener, CustomContro
 	private Pane imageParent;
 	@FXML
 	private Button btnPlayPause;
-
 	private Stage mainStage;
 	private ResizableImageView ivImage;
 	private Ticker ticker;
@@ -66,7 +64,6 @@ public class MainController implements Initializable, TickListener, CustomContro
 	private double resizeOffsetY = 0.0;
 	private boolean resizing = false;
 	private EnumSet<BorderSide> resizingSides = EnumSet.noneOf(BorderSide.class);
-
 	private SimpleStringProperty sessionTitleProperty = new SimpleStringProperty();
 	private SimpleDoubleProperty progressProperty = new SimpleDoubleProperty();
 	private SimpleStringProperty playPauseTextProperty = new SimpleStringProperty();
@@ -98,9 +95,6 @@ public class MainController implements Initializable, TickListener, CustomContro
 	public void setStage(Stage stage) {
 		mainStage = stage;
 
-		/*chkAlwaysOnTop.selectedProperty().set(mainStage.isAlwaysOnTop());
-		chkAlwaysOnTop.selectedProperty().addListener((observable, oldValue, newValue) -> mainStage.setAlwaysOnTop(newValue));*/
-
 		ApplicationConfig config = C.getInstance().getApplicationConfig();
 
 		// we don't want these values to always be loaded when we re-initialize from config
@@ -111,7 +105,6 @@ public class MainController implements Initializable, TickListener, CustomContro
 		mainStage.setY(config.window.pos_y);
 
 		initializeFromConfig(config);
-		//primaryStage.setOpacity(0.5);
 	}
 
 	@Override
@@ -197,8 +190,7 @@ public class MainController implements Initializable, TickListener, CustomContro
 	@Override
 	public void onFinished(Ticker ticker) {
 		ivImage.setImage(new Image("images/finished.png", R.Image.SCALE_RESOLUTION, R.Image.SCALE_RESOLUTION, true, true));
-		tickerTimeline.stop();
-		timerTimeline.stop();
+		onStopClick();
 	}
 
 	@FXML
@@ -210,13 +202,10 @@ public class MainController implements Initializable, TickListener, CustomContro
 
 		if (status.equals(Animation.Status.PAUSED)) {
 			tickerTimeline.play();
-			//playPauseTextProperty.set("Pause");
 		} else if (status.equals(Animation.Status.STOPPED)) {
 			tickerTimeline.playFromStart();
-			//playPauseTextProperty.set("Pause");
 		} else if (status.equals(Animation.Status.RUNNING)) {
 			tickerTimeline.pause();
-			//playPauseTextProperty.set("Play");
 		}
 	}
 
