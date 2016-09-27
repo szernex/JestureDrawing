@@ -162,15 +162,7 @@ public class MainController implements Initializable, TickListener, CustomContro
 		pbProgress.setProgress(0.0);
 		pbTimer.setProgress(0.0);
 
-		KeyValue keyValue = new KeyValue(pbTimer.progressProperty(), (1.0 + (1.0 / ticker.getCurrentSession().break_after_session))); // for some reason the target has to be set to above 1.0 or the bar won't fill before the image changes
-		KeyFrame keyFrame = new KeyFrame(Duration.seconds(ticker.getCurrentSession().break_after_session), keyValue);
-
-		if (timerTimeline != null)
-			timerTimeline.stop();
-
-		timerTimeline = new Timeline();
-		timerTimeline.getKeyFrames().add(keyFrame);
-		timerTimeline.playFromStart();
+		resetTimer(ticker.getCurrentSession().break_after_session);
 
 		System.gc();
 	}
@@ -193,17 +185,8 @@ public class MainController implements Initializable, TickListener, CustomContro
 
 		sessionTitleProperty.set(ticker.getCurrentSession().title);
 		pbProgress.setProgress((1.0 / ticker.getCurrentSession().image_count) * ticker.getCurrentImageCount());
-		pbTimer.setProgress(0.0);
 
-		KeyValue keyValue = new KeyValue(pbTimer.progressProperty(), (1.0 + (1.0 / ticker.getCurrentSession().interval))); // for some reason the target has to be set to above 1.0 or the bar won't fill before the image changes
-		KeyFrame keyFrame = new KeyFrame(Duration.seconds(ticker.getCurrentSession().interval), keyValue);
-
-		if (timerTimeline != null)
-			timerTimeline.stop();
-
-		timerTimeline = new Timeline();
-		timerTimeline.getKeyFrames().add(keyFrame);
-		timerTimeline.playFromStart();
+		resetTimer(ticker.getCurrentSession().interval);
 
 		System.gc();
 	}
@@ -310,6 +293,22 @@ public class MainController implements Initializable, TickListener, CustomContro
 	@FXML
 	public void onExitClick() {
 		mainStage.close();
+	}
+
+	private void resetTimer(int duration) {
+		// Re-initialize the timer
+		pbTimer.setProgress(0.0);
+
+		KeyValue keyValue = new KeyValue(pbTimer.progressProperty(), (1.0 + (1.0 / duration))); // for some reason the target has to be set to above 1.0 or the bar won't fill before the image changes
+		KeyFrame keyFrame = new KeyFrame(Duration.seconds(duration), keyValue);
+
+		if (timerTimeline == null)
+			timerTimeline = new Timeline();
+
+		timerTimeline.stop();
+		timerTimeline.getKeyFrames().clear();
+		timerTimeline.getKeyFrames().add(keyFrame);
+		timerTimeline.playFromStart();
 	}
 
 	private void initializeFromConfig(ApplicationConfig config) {
