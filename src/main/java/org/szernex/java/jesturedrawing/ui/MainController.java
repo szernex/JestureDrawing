@@ -5,12 +5,14 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -67,6 +69,7 @@ public class MainController implements Initializable, TickListener, CustomContro
 	private double resizeOffsetY = 0.0;
 	private boolean resizing = false;
 	private EnumSet<BorderSide> resizingSides = EnumSet.noneOf(BorderSide.class);
+	private SimpleObjectProperty<Cursor> cursorProperty = new SimpleObjectProperty<>();
 	private SimpleStringProperty sessionTitleProperty = new SimpleStringProperty();
 	private SimpleDoubleProperty progressProperty = new SimpleDoubleProperty();
 	private SimpleStringProperty playPauseTextProperty = new SimpleStringProperty();
@@ -107,13 +110,28 @@ public class MainController implements Initializable, TickListener, CustomContro
 		mainStage.setX(config.window.pos_x);
 		mainStage.setY(config.window.pos_y);
 
+		mainStage.getScene().cursorProperty().bind(cursorProperty);
+
 		initializeFromConfig(config);
 	}
 
 	@Override
 	public void handle(MouseEvent event) {
+		if (event.getSource().equals(mainContainer) && event.getEventType().equals(MouseEvent.MOUSE_MOVED)) {
+			EnumSet<BorderSide> sides = isMouseAtBorder(mainStage, event.getSceneX(), event.getSceneY(), R.WINDOW_RESIZE_BORDER_SIZE);
+
+			if (sides.contains(BorderSide.East) && sides.contains(BorderSide.South))
+				cursorProperty.set(Cursor.SE_RESIZE);
+			else if (sides.contains(BorderSide.East))
+				cursorProperty.set(Cursor.H_RESIZE);
+			else if (sides.contains(BorderSide.South))
+				cursorProperty.set(Cursor.V_RESIZE);
+			else
+				cursorProperty.set(Cursor.DEFAULT);
+		}
+
 		if (event.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
-			EnumSet<BorderSide> sides = isMouseAtBorder(mainStage, event.getSceneX(), event.getSceneY(), 10);
+			EnumSet<BorderSide> sides = isMouseAtBorder(mainStage, event.getSceneX(), event.getSceneY(), R.WINDOW_RESIZE_BORDER_SIZE);
 
 			resizing = !sides.isEmpty();
 
