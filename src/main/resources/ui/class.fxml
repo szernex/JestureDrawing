@@ -21,6 +21,7 @@
 	</HBox>
 
 	<VBox>
+		<Label text="Sessions"/>
 		<HBox>
 			<ListView fx:id="lstSessions"
 					VBox.vgrow="ALWAYS"
