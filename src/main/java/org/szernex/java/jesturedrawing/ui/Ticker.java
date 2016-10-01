@@ -59,6 +59,7 @@ public class Ticker {
 
 	public void skip() {
 		currentTimer = 0;
+		tick();
 	}
 
 	public void tick() {
