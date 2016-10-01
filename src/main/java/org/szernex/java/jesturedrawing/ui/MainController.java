@@ -10,6 +10,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -23,6 +24,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
@@ -36,6 +38,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable, TickListener, CustomController, EventHandler<MouseEvent> {
@@ -230,29 +233,7 @@ public class MainController implements Initializable, TickListener, CustomContro
 
 	@FXML
 	public void onClassClick() throws IOException {
-		FXMLLoader loader = new FXMLLoader();
-
-		loader.setLocation(ClassLoader.getSystemResource("ui/class.fxml"));
-
-		Parent parent = loader.load();
-		Scene scene = new Scene(parent, 0, 0);
-		Stage stage = new Stage();
-		boolean alwaysOnTop = mainStage.isAlwaysOnTop();
-
-		stage.setWidth(400);
-		stage.setHeight(600);
-		stage.setScene(scene);
-		stage.initModality(Modality.APPLICATION_MODAL);
-
-		if (loader.getController() instanceof CustomController)
-			((CustomController) loader.getController()).setStage(stage);
-
-		if (tickerTimeline != null && tickerTimeline.getStatus().equals(Animation.Status.RUNNING))
-			tickerTimeline.pause();
-
-		mainStage.setAlwaysOnTop(false);
-		stage.showAndWait();
-		mainStage.setAlwaysOnTop(alwaysOnTop);
+		showWindowAndWait("ui/class.fxml", 400, 600);
 
 		if (C.getInstance().isNewClass()) {
 			initializeTicker(C.getInstance().getGestureClass());
@@ -261,17 +242,57 @@ public class MainController implements Initializable, TickListener, CustomContro
 
 	@FXML
 	public void onOptionsClick() throws IOException {
+		showWindowAndWait("ui/options.fxml", 400, 600);
+
+		if (C.getInstance().isNewConfig())
+			initializeFromConfig(C.getInstance().getApplicationConfig());
+	}
+
+	@FXML
+	public void onExitClick() {
+		mainStage.close();
+	}
+
+	private void showWindowAndWait(String fxml, double width, double height) {
 		FXMLLoader loader = new FXMLLoader();
 
-		loader.setLocation(ClassLoader.getSystemResource("ui/options.fxml"));
+		loader.setLocation(ClassLoader.getSystemResource(fxml));
 
-		Parent parent = loader.load();
+		Parent parent;
+
+		try {
+			parent = loader.load();
+		} catch (IOException ex) {
+			logger.error("Error loading fxml resource " + fxml + ": " + ex.getMessage());
+			ex.printStackTrace();
+
+			return;
+		}
+
 		Scene scene = new Scene(parent, 0, 0);
 		Stage stage = new Stage();
 		boolean alwaysOnTop = mainStage.isAlwaysOnTop();
 
-		stage.setWidth(400);
-		stage.setHeight(600);
+		List<Screen> screens = Screen.getScreensForRectangle(mainStage.getX(), mainStage.getY(), mainStage.getWidth(), mainStage.getHeight());
+
+		if (!screens.isEmpty()) {
+			Screen screen = screens.get(0);
+			Rectangle2D bounds = screen.getBounds();
+
+			stage.setX(
+					bounds.getMinX()
+							+ ((bounds.getMaxX() - bounds.getMinX()) / 2)
+							- (width / 2)
+			);
+			stage.setY(
+					bounds.getMinY()
+							+ ((bounds.getMaxY() - bounds.getMinY()) / 2)
+							- (height / 2)
+			);
+		}
+
+		stage.setWidth(width);
+		stage.setHeight(height);
 		stage.setScene(scene);
 		stage.initModality(Modality.APPLICATION_MODAL);
 
@@ -284,14 +305,6 @@ public class MainController implements Initializable, TickListener, CustomContro
 		mainStage.setAlwaysOnTop(false);
 		stage.showAndWait();
 		mainStage.setAlwaysOnTop(alwaysOnTop);
-
-		if (C.getInstance().isNewConfig())
-			initializeFromConfig(C.getInstance().getApplicationConfig());
-	}
-
-	@FXML
-	public void onExitClick() {
-		mainStage.close();
 	}
 
 	private void resetTimer(int duration) {
