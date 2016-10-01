@@ -169,6 +169,8 @@ public class MainController implements Initializable, TickListener, CustomContro
 
 	@Override
 	public void onNewImage(Ticker ticker) {
+		tickerTimeline.play();
+
 		Path image = ticker.getCurrentImage();
 
 		pbTimer.setVisible(C.getInstance().getApplicationConfig().timerEnabled);
