@@ -230,29 +230,7 @@ public class MainController implements Initializable, TickListener, CustomContro
 
 	@FXML
 	public void onClassClick() throws IOException {
-		FXMLLoader loader = new FXMLLoader();
-
-		loader.setLocation(ClassLoader.getSystemResource("ui/class.fxml"));
-
-		Parent parent = loader.load();
-		Scene scene = new Scene(parent, 0, 0);
-		Stage stage = new Stage();
-		boolean alwaysOnTop = mainStage.isAlwaysOnTop();
-
-		stage.setWidth(400);
-		stage.setHeight(600);
-		stage.setScene(scene);
-		stage.initModality(Modality.APPLICATION_MODAL);
-
-		if (loader.getController() instanceof CustomController)
-			((CustomController) loader.getController()).setStage(stage);
-
-		if (tickerTimeline != null && tickerTimeline.getStatus().equals(Animation.Status.RUNNING))
-			tickerTimeline.pause();
-
-		mainStage.setAlwaysOnTop(false);
-		stage.showAndWait();
-		mainStage.setAlwaysOnTop(alwaysOnTop);
+		showWindowAndWait("ui/class.fxml", 400, 600);
 
 		if (C.getInstance().isNewClass()) {
 			initializeTicker(C.getInstance().getGestureClass());
@@ -261,17 +239,39 @@ public class MainController implements Initializable, TickListener, CustomContro
 
 	@FXML
 	public void onOptionsClick() throws IOException {
+		showWindowAndWait("ui/options.fxml", 400, 600);
+
+		if (C.getInstance().isNewConfig())
+			initializeFromConfig(C.getInstance().getApplicationConfig());
+	}
+
+	@FXML
+	public void onExitClick() {
+		mainStage.close();
+	}
+
+	private void showWindowAndWait(String fxml, double width, double height) {
 		FXMLLoader loader = new FXMLLoader();
 
-		loader.setLocation(ClassLoader.getSystemResource("ui/options.fxml"));
+		loader.setLocation(ClassLoader.getSystemResource(fxml));
 
-		Parent parent = loader.load();
+		Parent parent;
+
+		try {
+			parent = loader.load();
+		} catch (IOException ex) {
+			logger.error("Error loading fxml resource " + fxml + ": " + ex.getMessage());
+			ex.printStackTrace();
+
+			return;
+		}
+
 		Scene scene = new Scene(parent, 0, 0);
 		Stage stage = new Stage();
 		boolean alwaysOnTop = mainStage.isAlwaysOnTop();
 
-		stage.setWidth(400);
-		stage.setHeight(600);
+		stage.setWidth(width);
+		stage.setHeight(height);
 		stage.setScene(scene);
 		stage.initModality(Modality.APPLICATION_MODAL);
 
@@ -284,14 +284,6 @@ public class MainController implements Initializable, TickListener, CustomContro
 		mainStage.setAlwaysOnTop(false);
 		stage.showAndWait();
 		mainStage.setAlwaysOnTop(alwaysOnTop);
-
-		if (C.getInstance().isNewConfig())
-			initializeFromConfig(C.getInstance().getApplicationConfig());
-	}
-
-	@FXML
-	public void onExitClick() {
-		mainStage.close();
 	}
 
 	private void resetTimer(int duration) {
