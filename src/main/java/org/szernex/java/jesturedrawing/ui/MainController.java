@@ -10,6 +10,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -23,6 +24,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
@@ -36,6 +38,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable, TickListener, CustomController, EventHandler<MouseEvent> {
@@ -269,6 +272,24 @@ public class MainController implements Initializable, TickListener, CustomContro
 		Scene scene = new Scene(parent, 0, 0);
 		Stage stage = new Stage();
 		boolean alwaysOnTop = mainStage.isAlwaysOnTop();
+
+		List<Screen> screens = Screen.getScreensForRectangle(mainStage.getX(), mainStage.getY(), mainStage.getWidth(), mainStage.getHeight());
+
+		if (!screens.isEmpty()) {
+			Screen screen = screens.get(0);
+			Rectangle2D bounds = screen.getBounds();
+
+			stage.setX(
+					bounds.getMinX()
+							+ ((bounds.getMaxX() - bounds.getMinX()) / 2)
+							- (width / 2)
+			);
+			stage.setY(
+					bounds.getMinY()
+							+ ((bounds.getMaxY() - bounds.getMinY()) / 2)
+							- (height / 2)
+			);
+		}
 
 		stage.setWidth(width);
 		stage.setHeight(height);
